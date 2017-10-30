@@ -14,4 +14,38 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="init.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ann.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="old.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="geo.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="init.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="data.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="geo.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ann.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="old.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
 </Project>

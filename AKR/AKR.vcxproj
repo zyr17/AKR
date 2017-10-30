@@ -139,6 +139,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ann.cpp" />
+    <ClCompile Include="geo.cpp" />
+    <ClCompile Include="init.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="old.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ann.h" />
+    <ClInclude Include="data.h" />
+    <ClInclude Include="geo.h" />
+    <ClInclude Include="init.h" />
+    <ClInclude Include="old.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

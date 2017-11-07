@@ -1,6 +1,6 @@
 #include "init.h"
 namespace init {
-	std::vector<data::mappoint> init::initmappoints(std::string filename, std::map<std::string, int> words2num) {
+	std::vector<data::mappoint> initmappoints(std::string filename, std::map<std::string, int> words2num) {
 		FILE *f = fopen(filename.c_str(), "r");
 		std::vector<data::mappoint> res;
 		double x, y;
@@ -18,11 +18,13 @@ namespace init {
 				tmp.category.push_back(words2num[name]);
 			}
 			res.push_back(tmp);
+			printf("%d\n", res.size());
 		}
 		fclose(f);
+		return res;
 	}
 
-	data::query init::initquery(std::string filename, std::map<std::string, int> words2num) {
+	data::query initquery(std::string filename, std::map<std::string, int> words2num) {
 		FILE *f = fopen(filename.c_str(), "r");
 		data::query res;
 		int k;
@@ -42,9 +44,13 @@ namespace init {
 		for (fscanf(f, "%d", &k); k--; ) {
 			fscanf(f, "%s", buffer);
 			std::string str(buffer);
+			int tnum = -1;
 			if (words2num.find(str) != words2num.end())
-				res.needcategory.push_back(words2num[str]);
-			else res.needcategory.push_back(-1);
+				tnum = words2num[str];
+			bool inend = 0;
+			for (auto i : res.endcategory)
+				if (i == tnum) inend = 1;
+			if (!inend) res.needcategory.push_back(tnum);
 		}
 		return res;
 	}

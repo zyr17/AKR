@@ -17,7 +17,15 @@ namespace data {
 		std::vector<int> needcategory;
 	};
 	struct result {
-		double length;
-		std::vector<std::vector<geo::point>> result;
+		double maxlength;
+		std::vector<double> length;
+		std::vector<std::vector<int>> res;
+	};
+	struct detaildata {
+		result res;
+		std::vector<bool> category;
+		bool operator< (const detaildata &k) const {
+			return res.length < k.res.length;
+		}
 	};
 }

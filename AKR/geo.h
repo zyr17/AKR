@@ -9,12 +9,12 @@ namespace geo {
 		point operator- (const point &b) const {
 			return point(x - b.x, y - b.y);
 		}
-		double len2() {
+		double len2() const {
 			return x * x + y * y;
 		}
-		double len() {
+		double len() const {
 			return sqrt(len2());
 		}
 	};
-	point findcircle(std::vector<point> &pt);
+	point findcircle(std::vector<point> pt);
 }

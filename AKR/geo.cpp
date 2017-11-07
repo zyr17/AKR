@@ -1,6 +1,6 @@
 #include "geo.h"
 namespace geo{
-	int getcircle(point &a, point &b, point &c, point &O, double &r) {
+	int getcircle(const point &a, const point &b, const point &c, point &O, double &r) {
 		double a1 = 2.0*(a.x - b.x);
 		double b1 = 2.0*(a.y - b.y);
 		double c1 = a.x*a.x - b.x*b.x + a.y*a.y - b.y*b.y;
@@ -13,7 +13,7 @@ namespace geo{
 		return 0;
 	}
 
-	point findcircle(std::vector<point> &pt) {
+	point findcircle(std::vector<point> pt) {
 		double eps = 1e-8;
 		int n = pt.size();
 		std::random_shuffle(pt.begin(), pt.end());

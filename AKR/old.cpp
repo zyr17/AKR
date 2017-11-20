@@ -8,6 +8,7 @@ namespace old {
 		data::detaildata tdetail;
 		tdetail.category.resize(query.needcategory.size());
 		tdetail.res.maxlength = 0;
+		tdetail.res.endpoint = nowend;
 		for (auto i : query.start) {
 			std::vector<int> tvec;
 			tdetail.res.res.push_back(tvec);
@@ -101,7 +102,7 @@ namespace old {
 	}
 	data::result greedyway(const std::vector<data::mappoint> &mappoints, const data::query &query) {
 		data::result res;
-		res.maxlength = 1e100;
+		res.maxlength = 0;
 		geo::point center = geo::findcircle(query.start);
 		auto endpoints = getendpoints(mappoints, query);
 		auto needpoints = getneedpoints(mappoints, query);
@@ -111,9 +112,16 @@ namespace old {
 			if ((p - center).len() < (mappoints[endpointi].p - center).len())
 				endpointi = i;
 		}
+		res.endpoint = endpointi;
 		auto endpoint = mappoints[endpointi].p;
-		for (auto i : query.start)
-			res.length.push_back((i - endpoint).len());
+		for (auto i : query.start) {
+			auto tnum = (i - endpoint).len();
+			res.length.push_back(tnum);
+			if (res.maxlength < tnum)
+				res.maxlength = tnum;
+			std::vector<int> v;
+			res.res.push_back(v);
+		}
 		std::vector<int> needpoint;
 		for (int i = 0; i < needpoints.size(); i++) {
 			auto tp = needpoints[i][0];
@@ -153,6 +161,8 @@ namespace old {
 				return res;
 			}
 			res.length[nowmin] += minnextlen;
+			if (res.length[nowmin] > res.maxlength)
+				res.maxlength = res.length[nowmin];
 			res.res[nowmin].push_back(needpoint[minnext]);
 			for (int i = 0; i < needpoint.size(); i++) {
 				for (auto j : mappoints[needpoint[nowmin]].category)

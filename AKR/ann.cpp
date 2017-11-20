@@ -41,7 +41,7 @@ namespace ann {
 			if (enddis[i] == -1) {
 				double td = 0;
 				for (auto &j : query.start) {
-					double t = (j - center).len();
+					double t = (j - mappoints[endorder[i]].p).len();
 					if (t > td)
 						td = t;
 				}
@@ -55,6 +55,6 @@ namespace ann {
 		if (nowbest == 1e100)
 			return -1;
 		enddis[nowbesti] = -2;
-		return nowbesti;
+		return nowbesti == -1 ? -1 : endorder[nowbesti];
 	}
 }

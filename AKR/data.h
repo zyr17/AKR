@@ -18,6 +18,7 @@ namespace data {
 	};
 	struct result {
 		double maxlength;
+		int endpoint;
 		std::vector<double> length;
 		std::vector<std::vector<int>> res;
 	};
@@ -25,7 +26,7 @@ namespace data {
 		result res;
 		std::vector<bool> category;
 		bool operator< (const detaildata &k) const {
-			return res.length < k.res.length;
+			return res.maxlength > k.res.maxlength;
 		}
 	};
 }

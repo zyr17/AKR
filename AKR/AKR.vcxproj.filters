@@ -48,4 +48,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <Xsd Include="test.xsd">
+      <Filter>头文件</Filter>
+    </Xsd>
+  </ItemGroup>
 </Project>

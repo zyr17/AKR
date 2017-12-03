@@ -106,6 +106,10 @@ namespace old {
 		geo::point center = geo::findcircle(query.start);
 		auto endpoints = getendpoints(mappoints, query);
 		auto needpoints = getneedpoints(mappoints, query);
+		if (endpoints.size() == 0) {
+			res.maxlength = 1e100;
+			return res;
+		}
 		auto endpointi = endpoints[0];
 		for (auto i : endpoints) {
 			auto p = mappoints[i].p;
@@ -124,6 +128,10 @@ namespace old {
 		}
 		std::vector<int> needpoint;
 		for (int i = 0; i < needpoints.size(); i++) {
+			if (needpoints[i].size() == 0) {
+				res.maxlength = 1e100;
+				return res;
+			}
 			auto tp = needpoints[i][0];
 			for (auto j : needpoints[i]) {
 				if ((mappoints[j].p - center).len() < (mappoints[tp].p - center).len())
@@ -141,7 +149,6 @@ namespace old {
 				if (res.length[i] < res.length[nowmin])
 					nowmin = i;
 			auto prev = res.res[nowmin].size() == 0 ? query.start[nowmin] : mappoints[res.res[nowmin][res.res[nowmin].size() - 1]].p;
-			res.length[nowmin] -= (prev - endpoint).len();
 			int minnext = -1;
 			double minnextlen = 1e100;
 			for (int i = 0; i < needpoint.size(); i++) {
@@ -160,12 +167,13 @@ namespace old {
 					}
 				return res;
 			}
+			res.length[nowmin] -= (prev - endpoint).len();
 			res.length[nowmin] += minnextlen;
 			if (res.length[nowmin] > res.maxlength)
 				res.maxlength = res.length[nowmin];
 			res.res[nowmin].push_back(needpoint[minnext]);
 			for (int i = 0; i < needpoint.size(); i++) {
-				for (auto j : mappoints[needpoint[nowmin]].category)
+				for (auto j : mappoints[needpoint[minnext]].category)
 					if (query.needcategory[i] == j)
 						doneneedpoint[i] = 1;
 			}

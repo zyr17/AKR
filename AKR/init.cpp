@@ -18,7 +18,7 @@ namespace init {
 				tmp.category.push_back(words2num[name]);
 			}
 			res.push_back(tmp);
-			printf("%d\n", res.size());
+			//printf("%d\n", res.size());
 		}
 		fclose(f);
 		return res;

@@ -20,6 +20,15 @@ namespace old {
 		heap.push_back(tdetail);
 		for (; heap.size(); ) {
 			auto nowdetail = heap[0];
+			/*
+			printf("%f | ", nowdetail.res.maxlength);
+			for (int i = 0; i < nowdetail.category.size(); i++)
+				printf("%d ", nowdetail.category[i] ? 1 : 0);
+			printf("| ");
+			for (int i = 0; i < nowdetail.res.res.size(); i++)
+				printf("%d ", nowdetail.res.res[i].size() != 0 ? nowdetail.res.res[i][nowdetail.res.res[i].size() - 1] : -1);
+			printf("\n");
+			*/
 			std::pop_heap(heap.begin(), heap.end());
 			heap.pop_back();
 			if (nowdetail.res.maxlength > nowbest)

@@ -9,7 +9,7 @@ namespace ann {
 		std::vector<double> enddis;
 		std::vector<data::mappoint> mappoints;
 		data::query query;
-		double centerr;
+		double centerr, minr;
 		geo::point center;
 	public:
 		ann(const std::vector<data::mappoint> &inmappoints, const data::query &inquery);

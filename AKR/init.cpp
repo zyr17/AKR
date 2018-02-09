@@ -54,4 +54,26 @@ namespace init {
 		}
 		return res;
 	}
+	data::query randomquery(int startpointnum, int endcategorynum, int needcategorynum, std::vector<data::mappoint> &mappoints, std::map<std::string, int>& words2num)
+	{
+		data::query res;
+		double minx = 1e100, miny = 1e100, maxx = - 1e100, maxy = - 1e100;
+		for (auto i : mappoints) {
+			if (minx > i.p.x) minx = i.p.x;
+			if (miny > i.p.y) miny = i.p.y;
+			if (maxx < i.p.x) maxx = i.p.x;
+			if (maxy < i.p.y) maxy = i.p.y;
+		}
+		double delx = maxx - minx, dely = maxy - miny;
+		for (int i = startpointnum; i--; ) {
+			double x = minx + delx * rand() / RAND_MAX, y = miny + dely * rand() / RAND_MAX;
+			res.start.push_back(geo::point(x, y));
+		}
+		assert(words2num.size() <= RAND_MAX);
+		for (int i = endcategorynum; i--; )
+			res.endcategory.push_back(rand() % words2num.size());
+		for (int i = needcategorynum; i--; )
+			res.needcategory.push_back(rand() % words2num.size());
+		return res;
+	}
 }

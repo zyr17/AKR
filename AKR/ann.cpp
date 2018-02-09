@@ -18,10 +18,13 @@ namespace ann {
 		query = inquery;
 		center = geo::findcircle(inquery.start);
 		centerr = 0;
+		minr = 1e100;
 		for (auto &i : inquery.start) {
 			double t = (i - center).len();
 			if (centerr < t)
 				centerr = t;
+			if (minr > t)
+				minr = t;
 		}
 		endorder.clear();
 		for (int i = 0; i < inmappoints.size(); i++)
@@ -37,7 +40,7 @@ namespace ann {
 		int nowbesti = -1;
 		for (int i = 0; i < endorder.size(); i++) {
 			if (enddis[i] == -2) continue;
-			if ((mappoints[endorder[i]].p - center).len() >= nowbest + centerr) break;
+			if ((mappoints[endorder[i]].p - center).len() >= nowbest + minr) break;
 			if (enddis[i] == -1) {
 				double td = 0;
 				for (auto &j : query.start) {

@@ -1,6 +1,6 @@
 #include "geo.h"
 namespace geo{
-	int getcircle(const point &a, const point &b, const point &c, point &O, double &r) {
+	int getcircle(const point &a, const point &b, const point &c, point &O, double &r){
 		double a1 = 2.0*(a.x - b.x);
 		double b1 = 2.0*(a.y - b.y);
 		double c1 = a.x*a.x - b.x*b.x + a.y*a.y - b.y*b.y;
@@ -13,24 +13,24 @@ namespace geo{
 		return 0;
 	}
 
-	point findcircle(std::vector<point> pt) {
+	point findcircle(std::vector<point> pt){
 		double eps = 1e-8;
 		int n = pt.size();
 		std::random_shuffle(pt.begin(), pt.end());
 		double r = 0.0;
 		point O = pt[0];
-		for (int i = 1; i < n; i++) {
-			if ((pt[i] - O).len() - r > -eps) {
+		for (int i = 1; i < n; i++){
+			if ((pt[i] - O).len() - r > -eps){
 				O.x = (pt[0].x + pt[i].x) / 2.0;
 				O.y = (pt[0].y + pt[i].y) / 2.0;
 				r = (O - pt[0]).len();
-				for (int j = 0; j < i; j++) {
-					if ((pt[j] - O).len() - r > -eps) {
+				for (int j = 0; j < i; j++){
+					if ((pt[j] - O).len() - r > -eps){
 						O.x = (pt[i].x + pt[j].x) / 2.0;
 						O.y = (pt[i].y + pt[j].y) / 2.0;
 						r = (O - pt[i]).len();
-						for (int k = 0; k < j; k++) {
-							if ((pt[k] - O).len() - r > -eps) {
+						for (int k = 0; k < j; k++){
+							if ((pt[k] - O).len() - r > -eps){
 								getcircle(pt[i], pt[j], pt[k], O, r);
 							}
 						}

@@ -5,8 +5,8 @@ namespace data {
 	struct mappoint {
 		std::vector<int> category;
 		geo::point p;
-		mappoint() {}
-		mappoint(double x, double y) {
+		mappoint(){}
+		mappoint(double x, double y){
 			p.x = x;
 			p.y = y;
 		}

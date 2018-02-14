@@ -1,6 +1,10 @@
 #include "old.h"
 namespace old {
-	data::result getdetail(const std::vector<data::mappoint> &mappoints, const data::query &query, const std::vector<std::vector<int>> &needpoints, int nowend, double nowbest) {
+	data::result getdetail(const std::vector<data::mappoint> &mappoints, const data::query &query, const std::vector<std::vector<int>> &needpoints, int nowend, double nowbest){
+		int needtot = 0;
+		for (auto &i : needpoints)
+			needtot += i.size();
+		printf("needtot %d   ", needtot);
 		geo::point endpoint = mappoints[nowend].p;
 		data::result tres;
 		tres.maxlength = 1e100;
@@ -9,7 +13,7 @@ namespace old {
 		tdetail.category.resize(query.needcategory.size());
 		tdetail.res.maxlength = 0;
 		tdetail.res.endpoint = nowend;
-		for (auto i : query.start) {
+		for (auto i : query.start){
 			std::vector<int> tvec;
 			tdetail.res.res.push_back(tvec);
 			double tdouble = (i - mappoints[nowend].p).len();
@@ -18,7 +22,8 @@ namespace old {
 				tdetail.res.maxlength = tdouble;
 		}
 		heap.push_back(tdetail);
-		for (; heap.size(); ) {
+		int heapcount = 0;
+		for (; heap.size(); heapcount++){
 			auto nowdetail = heap[0];
 			/*
 			printf("%f | ", nowdetail.res.maxlength);
@@ -35,10 +40,10 @@ namespace old {
 				continue;
 			bool haszero = 0;
 			for (int i = 0; i < needpoints.size(); i ++ )
-				if (nowdetail.category[i] == 0) {
+				if (nowdetail.category[i] == 0){
 					haszero = 1;
 					for (auto j : needpoints[i]) 
-						for (int k = 0; k < query.start.size(); k++) {
+						for (int k = 0; k < query.start.size(); k++){
 							geo::point p = query.start[k];
 							if (nowdetail.res.res[k].size() != 0)
 								p = mappoints[*(--nowdetail.res.res[k].end())].p;
@@ -53,7 +58,7 @@ namespace old {
 							for (int detailnum = 0; detailnum < adddetail.category.size(); detailnum++)
 								if (adddetail.category[detailnum] == 0)
 									for (auto have : mappoints[j].category)
-										if (have == query.needcategory[detailnum]) {
+										if (have == query.needcategory[detailnum]){
 											adddetail.category[detailnum] = 1;
 											break;
 										}
@@ -61,17 +66,21 @@ namespace old {
 							std::push_heap(heap.begin(), heap.end());
 						}
 				}
-			if (!haszero) return nowdetail.res;
+			if (!haszero){
+				tres = nowdetail.res;
+				break;
+			}
 		}
+		printf("heapcount %d\n", heapcount);
 		return tres;
 	}
-	std::vector<int> getendpoints(const std::vector<data::mappoint> &mappoints, const data::query &query) {
+	std::vector<int> getendpoints(const std::vector<data::mappoint> &mappoints, const data::query &query){
 		std::vector<int> res;
-		for (auto &mappoint : mappoints) {
+		for (auto &mappoint : mappoints){
 			unsigned long long ull = 1LL << query.endcategory.size();
-			for (auto i : query.endcategory) {
+			for (auto i : query.endcategory){
 				for (auto j : mappoint.category)
-					if (i == j) {
+					if (i == j){
 						ull /= 2;
 						break;
 					}
@@ -80,7 +89,7 @@ namespace old {
 		}
 		return res;
 	}
-	std::vector<std::vector<int>> getneedpoints(const std::vector<data::mappoint> &mappoints, const data::query &query) {
+	std::vector<std::vector<int>> getneedpoints(const std::vector<data::mappoint> &mappoints, const data::query &query){
 		std::vector<std::vector<int>> res;
 		std::vector<int> tmp;
 		for (int i = 0; i < query.needcategory.size(); i++)
@@ -88,20 +97,20 @@ namespace old {
 		for (int i = 0; i < mappoints.size(); i++)
 			for (int j = 0; j < query.needcategory.size(); j++)
 				for (auto k : mappoints[i].category)
-					if (query.needcategory[j] == k) {
+					if (query.needcategory[j] == k){
 						res[j].push_back(i);
 						break;
 					}
 		return res;
 	}
-	data::result trueway(const std::vector<data::mappoint> &mappoints, const data::query &query) {
+	data::result trueway(const std::vector<data::mappoint> &mappoints, const data::query &query){
 		auto endpoints = getendpoints(mappoints, query);
 		auto needpoints = getneedpoints(mappoints, query);
 		data::result res;
 		res.maxlength = 1e100;
 		ann::ann ann(mappoints, query);
-		for (; ; ) {
-			int nowend = ann.nextsmallest();
+		for (; ; ){
+			int nowend = ann.nextsmallest(res.maxlength);
 			if (nowend == -1) break;
 			auto tres = getdetail(mappoints, query, needpoints, nowend, res.maxlength);
 			if (tres.maxlength < res.maxlength)
@@ -109,25 +118,25 @@ namespace old {
 		}
 		return res;
 	}
-	data::result greedyway(const std::vector<data::mappoint> &mappoints, const data::query &query) {
+	data::result greedyway(const std::vector<data::mappoint> &mappoints, const data::query &query){
 		data::result res;
 		res.maxlength = 0;
 		geo::point center = geo::findcircle(query.start);
 		auto endpoints = getendpoints(mappoints, query);
 		auto needpoints = getneedpoints(mappoints, query);
-		if (endpoints.size() == 0) {
+		if (endpoints.size() == 0){
 			res.maxlength = 1e100;
 			return res;
 		}
 		auto endpointi = endpoints[0];
-		for (auto i : endpoints) {
+		for (auto i : endpoints){
 			auto p = mappoints[i].p;
 			if ((p - center).len() < (mappoints[endpointi].p - center).len())
 				endpointi = i;
 		}
 		res.endpoint = endpointi;
 		auto endpoint = mappoints[endpointi].p;
-		for (auto i : query.start) {
+		for (auto i : query.start){
 			auto tnum = (i - endpoint).len();
 			res.length.push_back(tnum);
 			if (res.maxlength < tnum)
@@ -136,13 +145,13 @@ namespace old {
 			res.res.push_back(v);
 		}
 		std::vector<int> needpoint;
-		for (int i = 0; i < needpoints.size(); i++) {
-			if (needpoints[i].size() == 0) {
+		for (int i = 0; i < needpoints.size(); i++){
+			if (needpoints[i].size() == 0){
 				res.maxlength = 1e100;
 				return res;
 			}
 			auto tp = needpoints[i][0];
-			for (auto j : needpoints[i]) {
+			for (auto j : needpoints[i]){
 				if ((mappoints[j].p - center).len() < (mappoints[tp].p - center).len())
 					tp = j;
 			}
@@ -152,7 +161,7 @@ namespace old {
 		for (auto i : needpoint)
 			doneneedpoint.push_back(0);
 		//need step 3
-		for (; ; ) {
+		for (; ; ){
 			int nowmin = 0;
 			for (int i = 1; i < res.length.size(); i++)
 				if (res.length[i] < res.length[nowmin])
@@ -160,17 +169,17 @@ namespace old {
 			auto prev = res.res[nowmin].size() == 0 ? query.start[nowmin] : mappoints[res.res[nowmin][res.res[nowmin].size() - 1]].p;
 			int minnext = -1;
 			double minnextlen = 1e100;
-			for (int i = 0; i < needpoint.size(); i++) {
+			for (int i = 0; i < needpoint.size(); i++){
 				if (doneneedpoint[i]) continue;
 				auto nowlen = (mappoints[needpoint[i]].p - prev).len() + (mappoints[needpoint[i]].p - endpoint).len();
-				if (nowlen < minnextlen) {
+				if (nowlen < minnextlen){
 					minnextlen = nowlen;
 					minnext = i;
 				}
 			}
-			if (minnext == -1) {
+			if (minnext == -1){
 				for (auto i : doneneedpoint)
-					if (i == 0) {
+					if (i == 0){
 						res.maxlength = 1e100;
 						return res;
 					}
@@ -181,7 +190,7 @@ namespace old {
 			if (res.length[nowmin] > res.maxlength)
 				res.maxlength = res.length[nowmin];
 			res.res[nowmin].push_back(needpoint[minnext]);
-			for (int i = 0; i < needpoint.size(); i++) {
+			for (int i = 0; i < needpoint.size(); i++){
 				for (auto j : mappoints[needpoint[minnext]].category)
 					if (query.needcategory[i] == j)
 						doneneedpoint[i] = 1;

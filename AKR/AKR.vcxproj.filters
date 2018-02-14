@@ -30,6 +30,12 @@
     <ClCompile Include="geo.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="heaphash.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="test.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="init.h">
@@ -47,10 +53,14 @@
     <ClInclude Include="old.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="heaphash.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="test.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Xsd Include="test.xsd">
-      <Filter>头文件</Filter>
-    </Xsd>
+    <None Include="test.json" />
   </ItemGroup>
 </Project>

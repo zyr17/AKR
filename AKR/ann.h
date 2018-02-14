@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <ctime>
 #include "data.h"
 namespace ann {
 	//TODO read paper
@@ -13,6 +14,6 @@ namespace ann {
 		geo::point center;
 	public:
 		ann(const std::vector<data::mappoint> &inmappoints, const data::query &inquery);
-		int nextsmallest();
+		int nextsmallest(double nowbest = 1e100);
 	};
 }

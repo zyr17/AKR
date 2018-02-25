@@ -58,7 +58,7 @@ namespace ann {
 				nowbesti = i;
 			}
 		}
-		if (nowbest == 1e100)
+		if (nowbesti == -1)
 			return -1;
 		enddis[nowbesti] = -2;
 		return nowbesti == -1 ? -1 : endorder[nowbesti];

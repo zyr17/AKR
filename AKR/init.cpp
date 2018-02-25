@@ -78,17 +78,49 @@ namespace init {
 			res.needcategory.push_back(rand() % words2num.size());
 		return res;
 	}
-	void writequery(std::string filename, data::query &query){
-		FILE *f = fopen(filename.c_str(), "w");
-		fprintf(f, "%d\n", query.start.size());
-		for (auto i : query.start)
-			fprintf(f, "%f %f\n", i.x, i.y);
-		fprintf(f, "%d\n", query.endcategory.size());
-		for (auto i : query.endcategory)
-			fprintf(f, "%s\n", num2words[i]);
-		fprintf(f, "%d\n", query.needcategory.size());
-		for (auto i : query.needcategory)
-			fprintf(f, "%s\n", num2words[i]);
-		fclose(f);
+
+	void getfiles(const char* lpPath, std::vector<std::string> &fileList) {
+		char szFind[MAX_PATH];
+		WIN32_FIND_DATA FindFileData;
+
+		strcpy(szFind, lpPath);
+		strcat(szFind, "/*.*");
+		wchar_t wszFind[MAX_PATH] = {0};
+		MultiByteToWideChar(CP_ACP, 0, szFind, strlen(szFind), wszFind, MultiByteToWideChar(CP_ACP, 0, szFind, strlen(szFind), NULL, 0));
+		HANDLE hFind = ::FindFirstFile(wszFind, &FindFileData);
+		if (INVALID_HANDLE_VALUE == hFind)    return;
+
+		while (true)
+		{
+			if (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+			{
+				if (FindFileData.cFileName[0] != '.')
+				{
+					char szFile[MAX_PATH] = {0};
+					strcpy(szFile, lpPath);
+					strcat(szFile, "/");
+					strcat(szFile, (char*)(FindFileData.cFileName));
+					getfiles(szFile, fileList);
+				}
+			}
+			else
+			{
+				//std::cout << FindFileData.cFileName << std::endl;  
+				char fn[MAX_PATH] = {0};
+				WideCharToMultiByte(CP_ACP, 0, FindFileData.cFileName, wcslen(FindFileData.cFileName), fn, WideCharToMultiByte(CP_ACP, 0, FindFileData.cFileName, wcslen(FindFileData.cFileName), NULL, 0, NULL, NULL), NULL, NULL);
+				fileList.push_back(fn);
+			}
+			if (!FindNextFile(hFind, &FindFileData))    break;
+		}
+		FindClose(hFind);
+	}
+
+	std::vector<data::query> getqueries(std::string foldername, std::map<std::string, int> &words2num){
+		std::vector<std::string> files;
+		getfiles(foldername.c_str(), files);
+		std::vector<data::query> res;
+		for (auto i : files)
+			res.push_back(initquery((foldername + "/" + i).c_str(), words2num));
+		return res;
 	}
 }

@@ -144,6 +144,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ann.cpp" />
+    <ClCompile Include="data.cpp" />
     <ClCompile Include="geo.cpp" />
     <ClCompile Include="heaphash.cpp" />
     <ClCompile Include="init.cpp" />

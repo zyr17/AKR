@@ -23,6 +23,7 @@ namespace old {
 		}
 		heap.push_back(tdetail);
 		int heapcount = 0;
+		heaphash::heaphash hh(query.needcategory.size());
 		for (; heap.size(); heapcount++){
 			auto nowdetail = heap[0];
 			/*
@@ -36,6 +37,9 @@ namespace old {
 			*/
 			std::pop_heap(heap.begin(), heap.end());
 			heap.pop_back();
+			double nowmin = hh.find(nowdetail);
+			if (nowmin < nowdetail.res.maxlength) continue;
+			hh.insert(nowdetail);
 			if (nowdetail.res.maxlength > nowbest)
 				continue;
 			bool haszero = 0;

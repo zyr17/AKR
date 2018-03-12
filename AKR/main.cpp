@@ -6,17 +6,17 @@
 #include "old.h"
 #include "test.h"
 #define DATAFOLDER "../Data/gaode/"
-void multitests(int times, double &trueclock, double &greedyclock, double &greedypoint, std::vector<data::mappoint> &mappoints, std::map<std::string, int> &words2num, std::vector<data::query> & randomed){
+void multitests(int times, double &trueclock, double &greedyclock, double &greedypoint, std::vector<data::mappoint> &mappoints, std::map<std::string, int> &words2num, std::vector<data::query> &randomed, bool forcerandom = false){
 	trueclock = greedyclock = greedypoint = 0;
 	for (int i = 1; i <= times; i++){
 		char buffer[1000] = { 0 };
 		printf("multitest doing %d\n", i);
 		data::query query;
-		if (randomed.size() >= i){
+		if (randomed.size() >= i && !forcerandom){
 			query = randomed[i - 1];
 		}
 		else{
-			query = init::randomquery(4, 1, 3, mappoints, words2num);
+			query = init::randomquery(4, 1, 4, mappoints, words2num);
 			sprintf(buffer, DATAFOLDER "/random/query/%06d.txt", i);
 			query.write(buffer);
 		}

@@ -5,6 +5,7 @@
 #include "init.h"
 #include "old.h"
 #include "test.h"
+#include "maxavg.h"
 #define DATAFOLDER "../Data/gaode/"
 void multitests(int times, double &trueclock, double &greedyclock, double &greedypoint, std::vector<data::mappoint> &mappoints, std::map<std::string, int> &words2num, std::vector<data::query> &randomed, bool forcerandom = false){
 	trueclock = greedyclock = greedypoint = 0;
@@ -28,7 +29,7 @@ void multitests(int times, double &trueclock, double &greedyclock, double &greed
 		startclock = clock();
 		data::result oldgreedyres = old::greedyway(mappoints, query);
 		greedyclock += clock() - startclock;
-		greedypoint += oldgreedyres.maxlength / oldtrueres.maxlength;
+		greedypoint += oldgreedyres.reslength / oldtrueres.reslength;
 	}
 	trueclock /= times;
 	greedyclock /= times;

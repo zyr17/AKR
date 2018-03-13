@@ -22,7 +22,7 @@ namespace data {
 		std::string writestr();
 	};
 	struct result {
-		double maxlength;
+		double reslength;
 		int endpoint;
 		std::vector<double> length;
 		std::vector<std::vector<int>> res;
@@ -33,7 +33,7 @@ namespace data {
 		result res;
 		std::vector<bool> category;
 		bool operator< (const detaildata &k) const {
-			return res.maxlength > k.res.maxlength;
+			return res.reslength > k.res.reslength;
 		}
 	};
 }

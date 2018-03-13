@@ -149,6 +149,7 @@
     <ClCompile Include="heaphash.cpp" />
     <ClCompile Include="init.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="maxavg.cpp" />
     <ClCompile Include="old.cpp" />
     <ClCompile Include="test.cpp" />
   </ItemGroup>
@@ -158,6 +159,7 @@
     <ClInclude Include="geo.h" />
     <ClInclude Include="heaphash.h" />
     <ClInclude Include="init.h" />
+    <ClInclude Include="maxavg.h" />
     <ClInclude Include="old.h" />
     <ClInclude Include="test.h" />
   </ItemGroup>

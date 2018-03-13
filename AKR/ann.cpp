@@ -21,12 +21,14 @@ namespace ann {
 		//printf("ann::findcircle %lld\n", clock() - stc);
 		centerr = 0;
 		minr = 1e100;
+		sigmar = 0;
 		for (auto &i : inquery.start){
 			double t = (i - center).len();
 			if (centerr < t)
 				centerr = t;
 			if (minr > t)
 				minr = t;
+			sigmar += t;
 		}
 		endorder.clear();
 		for (int i = 0; i < inmappoints.size(); i++)
@@ -39,20 +41,25 @@ namespace ann {
 		for (auto &i : endorder)
 			enddis.push_back(-1);
 	}
+	inline bool ann::outcheck(const geo::point &pointnum, const geo::point &center, double nowbest, double minr, double sigmar){
+		return (pointnum - center).len() >= nowbest + minr;
+	}
+	inline double ann::getenddis(const data::query &query, const geo::point &p){
+		double res = 0;
+		for (auto &j : query.start){
+			double t = (j - p).len();
+			if (t > res)
+				res = t;
+		}
+		return res;
+	}
 	int ann::nextsmallest(double nowbest){
 		int nowbesti = -1;
 		for (int i = 0; i < endorder.size(); i++){
 			if (enddis[i] == -2) continue;
-			if ((mappoints[endorder[i]].p - center).len() >= nowbest + minr) break;
-			if (enddis[i] == -1){
-				double td = 0;
-				for (auto &j : query.start){
-					double t = (j - mappoints[endorder[i]].p).len();
-					if (t > td)
-						td = t;
-				}
-				enddis[i] = td;
-			}
+			if (outcheck(mappoints[endorder[i]].p, center, nowbest, minr, sigmar)) break;
+			if (enddis[i] == -1)
+				enddis[i] = getenddis(query, mappoints[endorder[i]].p);
 			if (enddis[i] < nowbest){
 				nowbest = enddis[i];
 				nowbesti = i;

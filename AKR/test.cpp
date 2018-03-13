@@ -11,7 +11,7 @@ namespace test {
 		detail.category[0] = 1;
 		detail.category[3] = 1;
 		detail.category[4] = 1;
-		detail.res.maxlength = 10.5;
+		detail.res.reslength = 10.5;
 		detail.res.res[0].push_back(1);
 		detail.res.res[1].push_back(100);
 		volatile auto res = hh.find(detail);
@@ -23,11 +23,11 @@ namespace test {
 		detail2.category[4] = 0;
 		res = hh.find(detail2);
 		printf("%f\n", res);
-		detail2.res.maxlength = 11.5;
+		detail2.res.reslength = 11.5;
 		hh.insert(detail2);
 		res = hh.find(detail2);
 		printf("%f\n", res);
-		detail2.res.maxlength = 9.5;
+		detail2.res.reslength = 9.5;
 		hh.insert(detail2);
 		res = hh.find(detail2);
 		printf("%f\n", res);

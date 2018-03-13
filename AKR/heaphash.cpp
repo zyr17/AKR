@@ -65,7 +65,7 @@ namespace heaphash {
 				hv.hash = hash2;
 				map.insert(std::make_pair(hash1, hv));
 			}
-			map[hash1].insert(detail.category, detail.res.maxlength);
+			map[hash1].insert(detail.category, detail.res.reslength);
 			break;
 		}
 	}

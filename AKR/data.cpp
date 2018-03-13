@@ -45,7 +45,7 @@ namespace data {
 		//TODO mappoints内容输出，以及相关数据进行验证
 		std::string resstr;
 		char buffer[1000] = { 0 };
-		sprintf(buffer, "maxlength: %.6f\n", maxlength);
+		sprintf(buffer, "reslength: %.6f\n", reslength);
 		resstr += buffer;
 		sprintf(buffer, "endpoint: %d\n", endpoint);
 		resstr += buffer;

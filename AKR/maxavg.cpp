@@ -12,12 +12,12 @@ namespace maxavg{
 		}
 		return res;
 	}
-	inline void maxclass::updatereslength(data::detaildata &detail, double olddata, double newdata) {
+	void maxclass::updatereslength(data::detaildata &detail, double olddata, double newdata) {
 		if (newdata > detail.res.reslength)
 			detail.res.reslength = newdata;
 	}
 
-	inline data::detaildata maxclass::tryadddetail(const std::vector<data::mappoint> &mappoints, const data::query &query, data::detaildata &nowdetail, geo::point endpoint, double nowbest, int addpoint, int startpoint) {
+	data::detaildata maxclass::tryadddetail(const std::vector<data::mappoint> &mappoints, const data::query &query, data::detaildata &nowdetail, geo::point endpoint, double nowbest, int addpoint, int startpoint) {
 		geo::point p = query.start[startpoint];
 		if (nowdetail.res.res[startpoint].size() != 0)
 			p = mappoints[*(--nowdetail.res.res[startpoint].end())].p;

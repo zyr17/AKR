@@ -22,12 +22,12 @@ void multitests(int times, double &trueclock, double &greedyclock, double &greed
 			query.write(buffer);
 		}
 		int startclock = clock();
-		data::result oldtrueres = old::trueway(mappoints, query);
+		data::result oldtrueres = old<maxavg::maxclass>::trueway(mappoints, query);
 		sprintf(buffer, DATAFOLDER "/random/result/%06d.txt", i);
 		oldtrueres.write(buffer, &query);
 		trueclock += clock() - startclock;
 		startclock = clock();
-		data::result oldgreedyres = old::greedyway(mappoints, query);
+		data::result oldgreedyres = old<maxavg::maxclass>::greedyway(mappoints, query);
 		greedyclock += clock() - startclock;
 		greedypoint += oldgreedyres.reslength / oldtrueres.reslength;
 	}

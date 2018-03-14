@@ -24,9 +24,6 @@
     <ClCompile Include="ann.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="old.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="geo.cpp">
       <Filter>源文件</Filter>
     </ClCompile>

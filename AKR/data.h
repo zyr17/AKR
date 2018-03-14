@@ -32,8 +32,5 @@ namespace data {
 	struct detaildata {
 		result res;
 		std::vector<bool> category;
-		bool operator< (const detaildata &k) const {
-			return res.reslength > k.res.reslength;
-		}
 	};
 }

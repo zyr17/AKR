@@ -4,8 +4,6 @@
 #include "heaphash.h"
 template <class T> class old {
 public:
-	//static inline void updatereslength(data::detaildata &detail, double olddata, double newdata);
-	//static inline data::detaildata tryadddetail(const std::vector<data::mappoint> &mappoints, const data::query &query, data::detaildata &nowdetail, geo::point endpoint, double nowbest, int addpoint, int startpoint);
 	static data::result getdetail(const std::vector<data::mappoint> &mappoints, const data::query &query, const std::vector<std::vector<int>> &needpoints, int nowend, double nowbest);
 	static std::vector<int> getendpoints(const std::vector<data::mappoint> &mappoints, const data::query &query);
 	static std::vector<std::vector<int>> getneedpoints(const std::vector<data::mappoint> &mappoints, const data::query &query);
@@ -20,7 +18,9 @@ template <class T> data::result old<T>::getdetail(const std::vector<data::mappoi
 	geo::point endpoint = mappoints[nowend].p;
 	data::result tres;
 	tres.reslength = 1e100;
-	std::vector<data::detaildata> heap;
+	std::vector<data::detaildata> details;
+	details.reserve(1000000);
+	std::vector<int> heap;
 	data::detaildata tdetail;
 	tdetail.category.resize(query.needcategory.size());
 	tdetail.res.reslength = 0;
@@ -32,11 +32,13 @@ template <class T> data::result old<T>::getdetail(const std::vector<data::mappoi
 		tdetail.res.length.push_back(tdouble);
 		T::updatereslength(tdetail, 0, tdouble);
 	}
-	heap.push_back(tdetail);
+	details.push_back(tdetail);
+	heap.push_back(0);
 	int heapcount = 0;
 	heaphash::heaphash hh(query.needcategory.size());
+	auto cmp = [&](int x, int y) { return details[x].res.reslength > details[y].res.reslength; };
 	for (; heap.size(); heapcount++){
-		auto nowdetail = heap[0];
+		auto nowdetail = details[heap[0]];
 		/*
 		printf("%f | ", nowdetail.res.reslength);
 		for (int i = 0; i < nowdetail.category.size(); i++)
@@ -46,7 +48,7 @@ template <class T> data::result old<T>::getdetail(const std::vector<data::mappoi
 		printf("%d ", nowdetail.res.res[i].size() != 0 ? nowdetail.res.res[i][nowdetail.res.res[i].size() - 1] : -1);
 		printf("\n");
 		*/
-		std::pop_heap(heap.begin(), heap.end());
+		std::pop_heap(heap.begin(), heap.end(), cmp);
 		heap.pop_back();
 		double nowmin = hh.find(nowdetail);
 		if (nowmin < nowdetail.res.reslength) continue;
@@ -61,8 +63,9 @@ template <class T> data::result old<T>::getdetail(const std::vector<data::mappoi
 					for (int k = 0; k < query.start.size(); k++){
 						auto adddetail = T::tryadddetail(mappoints, query, nowdetail, endpoint, nowbest, j, k);
 						if (adddetail.res.reslength > 1e99) continue;
-						heap.push_back(adddetail);
-						std::push_heap(heap.begin(), heap.end());
+						heap.push_back(details.size());
+						details.push_back(adddetail);
+						std::push_heap(heap.begin(), heap.end(), cmp);
 					}
 			}
 		if (!haszero){

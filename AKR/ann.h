@@ -47,20 +47,6 @@ namespace ann {
 		for (auto &i : endorder)
 			enddis.push_back(-1);
 	}
-	/*
-	inline bool ann::outcheck(const geo::point &pointnum, const geo::point &center, double nowbest, double minr, double sigmar){
-		return (pointnum - center).len() >= nowbest + minr;
-	}
-	inline double ann::getenddis(const data::query &query, const geo::point &p){
-		double res = 0;
-		for (auto &j : query.start){
-			double t = (j - p).len();
-			if (t > res)
-				res = t;
-		}
-		return res;
-	}
-	*/
 	template <class T> int ann<T>::nextsmallest(double nowbest){
 		int nowbesti = -1;
 		for (int i = 0; i < endorder.size(); i++){

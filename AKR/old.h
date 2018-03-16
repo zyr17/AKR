@@ -18,27 +18,25 @@ template <class T> data::result old<T>::getdetail(const std::vector<data::mappoi
 	geo::point endpoint = mappoints[nowend].p;
 	data::result tres;
 	tres.reslength = 1e100;
-	std::vector<data::detaildata> details;
-	details.reserve(1000000);
-	std::vector<int> heap;
-	data::detaildata tdetail;
-	tdetail.category.resize(query.needcategory.size());
-	tdetail.res.reslength = 0;
-	tdetail.res.endpoint = nowend;
+	std::vector<data::detaildata*> heap;
+	heap.reserve(1000000);
+	data::detaildata *tdetail = new data::detaildata;
+	tdetail->category.resize(query.needcategory.size());
+	tdetail->res.reslength = 0;
+	tdetail->res.endpoint = nowend;
 	for (auto i : query.start){
 		std::vector<int> tvec;
-		tdetail.res.res.push_back(tvec);
+		tdetail->res.res.push_back(tvec);
 		double tdouble = (i - mappoints[nowend].p).len();
-		tdetail.res.length.push_back(tdouble);
-		T::updatereslength(tdetail, 0, tdouble);
+		tdetail->res.length.push_back(tdouble);
+		T::updatereslength(*tdetail, 0, tdouble);
 	}
-	details.push_back(tdetail);
-	heap.push_back(0);
+	heap.push_back(tdetail);
 	int heapcount = 0;
 	heaphash::heaphash hh(query.needcategory.size());
-	auto cmp = [&](int x, int y) { return details[x].res.reslength > details[y].res.reslength; };
+	auto cmp = [&](data::detaildata *x, data::detaildata *y) { return x->res.reslength > y->res.reslength; };
 	for (; heap.size(); heapcount++){
-		auto nowdetail = details[heap[0]];
+		auto &nowdetail = *heap[0];
 		/*
 		printf("%f | ", nowdetail.res.reslength);
 		for (int i = 0; i < nowdetail.category.size(); i++)
@@ -62,9 +60,8 @@ template <class T> data::result old<T>::getdetail(const std::vector<data::mappoi
 				for (auto j : needpoints[i])
 					for (int k = 0; k < query.start.size(); k++){
 						auto adddetail = T::tryadddetail(mappoints, query, nowdetail, endpoint, nowbest, j, k);
-						if (adddetail.res.reslength > 1e99) continue;
-						heap.push_back(details.size());
-						details.push_back(adddetail);
+						if (adddetail == nullptr) continue;
+						heap.push_back(adddetail);
 						std::push_heap(heap.begin(), heap.end(), cmp);
 					}
 			}

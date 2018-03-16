@@ -7,6 +7,7 @@
 #include "test.h"
 #include "maxavg.h"
 #define DATAFOLDER "../Data/gaode/"
+typedef maxavg::maxclass USEDCLASS;
 void multitests(int times, double &trueclock, double &greedyclock, double &greedypoint, std::vector<data::mappoint> &mappoints, std::map<std::string, int> &words2num, std::vector<data::query> &randomed, bool forcerandom = false){
 	trueclock = greedyclock = greedypoint = 0;
 	for (int i = 1; i <= times; i++){
@@ -22,12 +23,12 @@ void multitests(int times, double &trueclock, double &greedyclock, double &greed
 			query.write(buffer);
 		}
 		int startclock = clock();
-		data::result oldtrueres = old<maxavg::maxclass>::trueway(mappoints, query);
+		data::result oldtrueres = old<USEDCLASS>::trueway(mappoints, query);
 		sprintf(buffer, DATAFOLDER "/random/result/%06d.txt", i);
 		oldtrueres.write(buffer, &query);
 		trueclock += clock() - startclock;
 		startclock = clock();
-		data::result oldgreedyres = old<maxavg::maxclass>::greedyway(mappoints, query);
+		data::result oldgreedyres = old<USEDCLASS>::greedyway(mappoints, query);
 		greedyclock += clock() - startclock;
 		greedypoint += oldgreedyres.reslength / oldtrueres.reslength;
 	}

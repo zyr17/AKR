@@ -51,7 +51,7 @@ namespace ann {
 		int nowbesti = -1;
 		for (int i = 0; i < endorder.size(); i++){
 			if (enddis[i] == -2) continue;
-			if (T::outcheck(mappoints[endorder[i]].p, center, nowbest, minr, sigmar)) break;
+			if (T::outcheck(mappoints[endorder[i]].p, center, nowbest, minr, sigmar, query.start.size())) break;
 			if (enddis[i] == -1)
 				enddis[i] = T::getenddis(query, mappoints[endorder[i]].p);
 			if (enddis[i] < nowbest){

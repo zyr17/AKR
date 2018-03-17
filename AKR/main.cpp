@@ -7,7 +7,9 @@
 #include "test.h"
 #include "maxavg.h"
 #define DATAFOLDER "../Data/gaode/"
-typedef maxavg::maxclass USEDCLASS;
+#define RANDOMNUM 100
+#define MAPPOINTFILE "small.txt"
+typedef maxavg::avgclass USEDCLASS;
 void multitests(int times, double &trueclock, double &greedyclock, double &greedypoint, std::vector<data::mappoint> &mappoints, std::map<std::string, int> &words2num, std::vector<data::query> &randomed, bool forcerandom = false){
 	trueclock = greedyclock = greedypoint = 0;
 	for (int i = 1; i <= times; i++){
@@ -29,6 +31,7 @@ void multitests(int times, double &trueclock, double &greedyclock, double &greed
 		trueclock += clock() - startclock;
 		startclock = clock();
 		data::result oldgreedyres = old<USEDCLASS>::greedyway(mappoints, query);
+		assert(oldtrueres.reslength <= oldgreedyres.reslength * (1 + 1e-8) + 1e-8);
 		greedyclock += clock() - startclock;
 		greedypoint += oldgreedyres.reslength / oldtrueres.reslength;
 	}
@@ -43,12 +46,12 @@ int main(){
 	printf("%s", buffer);
 	std::map<std::string, int> words2num;
 	//map数据格式：一行一个点，坐标x, y，语义数量k，若干语义空格分隔，语义中间无空格，最长100
-	auto mappoints = init::initmappoints(DATAFOLDER "small.txt", words2num);
+	auto mappoints = init::initmappoints(DATAFOLDER MAPPOINTFILE, words2num);
 
 	auto randomed = init::getqueries(DATAFOLDER "random/query", words2num);
 
 	double trueclock, greedyclock, greedypoint;
-	multitests(100, trueclock, greedyclock, greedypoint, mappoints, words2num, randomed);
+	multitests(RANDOMNUM, trueclock, greedyclock, greedypoint, mappoints, words2num, randomed);
 	FILE *f = fopen(DATAFOLDER "res.txt", "w");
 	fprintf(f, "%f %f %f\n", trueclock, greedyclock, greedypoint);
 	fclose(f);

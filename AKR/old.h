@@ -22,6 +22,10 @@ template <class T> data::result old<T>::getdetail(const std::vector<data::mappoi
 	heap.reserve(1000000);
 	data::detaildata *tdetail = new data::detaildata;
 	tdetail->category.resize(query.needcategory.size());
+	for (int i = 0; i < query.needcategory.size(); i++)
+		for (auto j : mappoints[nowend].category)
+			if (query.needcategory[i] == j)
+				tdetail->category[i] = 1;
 	tdetail->res.reslength = 0;
 	tdetail->res.endpoint = nowend;
 	for (auto i : query.start){
@@ -29,7 +33,7 @@ template <class T> data::result old<T>::getdetail(const std::vector<data::mappoi
 		tdetail->res.res.push_back(tvec);
 		double tdouble = (i - mappoints[nowend].p).len();
 		tdetail->res.length.push_back(tdouble);
-		T::updatereslength(*tdetail, 0, tdouble);
+		T::updatereslength(*tdetail, tdouble);
 	}
 	heap.push_back(tdetail);
 	int heapcount = 0;
@@ -118,80 +122,7 @@ template <class T> data::result old<T>::trueway(const std::vector<data::mappoint
 	return res;
 }
 template <class T> data::result old<T>::greedyway(const std::vector<data::mappoint> &mappoints, const data::query &query){
-	data::result res;
-	res.reslength = 0;
-	geo::point center = geo::findcircle(query.start);
 	auto endpoints = getendpoints(mappoints, query);
 	auto needpoints = getneedpoints(mappoints, query);
-	if (endpoints.size() == 0){
-		res.reslength = 1e100;
-		return res;
-	}
-	auto endpointi = endpoints[0];
-	for (auto i : endpoints){
-		auto p = mappoints[i].p;
-		if ((p - center).len() < (mappoints[endpointi].p - center).len())
-			endpointi = i;
-	}
-	res.endpoint = endpointi;
-	auto endpoint = mappoints[endpointi].p;
-	for (auto i : query.start){
-		auto tnum = (i - endpoint).len();
-		res.length.push_back(tnum);
-		if (res.reslength < tnum)
-			res.reslength = tnum;
-		std::vector<int> v;
-		res.res.push_back(v);
-	}
-	std::vector<int> needpoint;
-	for (int i = 0; i < needpoints.size(); i++){
-		if (needpoints[i].size() == 0){
-			res.reslength = 1e100;
-			return res;
-		}
-		auto tp = needpoints[i][0];
-		for (auto j : needpoints[i]){
-			if ((mappoints[j].p - center).len() < (mappoints[tp].p - center).len())
-				tp = j;
-		}
-		needpoint.push_back(tp);
-	}
-	std::vector<bool> doneneedpoint;
-	for (auto i : needpoint)
-		doneneedpoint.push_back(0);
-	for (;;){
-		int nowmin = 0;
-		for (int i = 1; i < res.length.size(); i++)
-			if (res.length[i] < res.length[nowmin])
-				nowmin = i;
-		auto prev = res.res[nowmin].size() == 0 ? query.start[nowmin] : mappoints[res.res[nowmin][res.res[nowmin].size() - 1]].p;
-		int minnext = -1;
-		double minnextlen = 1e100;
-		for (int i = 0; i < needpoint.size(); i++){
-			if (doneneedpoint[i]) continue;
-			auto nowlen = (mappoints[needpoint[i]].p - prev).len() + (mappoints[needpoint[i]].p - endpoint).len();
-			if (nowlen < minnextlen){
-				minnextlen = nowlen;
-				minnext = i;
-			}
-		}
-		if (minnext == -1){
-			for (auto i : doneneedpoint)
-				if (i == 0){
-					res.reslength = 1e100;
-					return res;
-				}
-			return res;
-		}
-		res.length[nowmin] -= (prev - endpoint).len();
-		res.length[nowmin] += minnextlen;
-		if (res.length[nowmin] > res.reslength)
-			res.reslength = res.length[nowmin];
-		res.res[nowmin].push_back(needpoint[minnext]);
-		for (int i = 0; i < needpoint.size(); i++){
-			for (auto j : mappoints[needpoint[minnext]].category)
-				if (query.needcategory[i] == j)
-					doneneedpoint[i] = 1;
-		}
-	}
+	return T::naivegreedy(mappoints, query, endpoints, needpoints);
 }

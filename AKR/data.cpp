@@ -19,13 +19,13 @@ namespace data {
 		sprintf(buffer, "%d\n", q.endcategory.size());
 		res += buffer;
 		for (auto i : q.endcategory){
-			res += init::num2words[i];
+			res += i == -1 ? "Unknown Keyword" : init::num2words[i];
 			res += "\n";
 		}
 		sprintf(buffer, "%d\n", q.needcategory.size());
 		res += buffer;
 		for (auto i : q.needcategory){
-			res += init::num2words[i];
+			res += i == -1 ? "Unknown Keyword" : init::num2words[i];
 			res += "\n";
 		}
 		return res;

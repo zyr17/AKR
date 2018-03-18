@@ -21,11 +21,14 @@ namespace data {
 		void write(std::string filename);
 		std::string writestr();
 	};
+	struct oneline {
+		std::vector<int> res;
+		double length;
+	};
 	struct result {
 		double reslength;
 		int endpoint;
-		std::vector<double> length;
-		std::vector<std::vector<int>> res;
+		std::vector<oneline> lines;
 		void write(std::string filename, query *query = nullptr);
 		std::string writestr();
 	};

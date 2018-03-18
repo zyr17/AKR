@@ -45,8 +45,8 @@ namespace heaphash {
 	void heaphash::insert(data::detaildata &detail){
 		unsigned long long hash1 = 0, hash2 = 0;
 		std::vector<int> points;
-		for (int i = 0; i < detail.res.res.size(); i++){
-			int last = detail.res.res[i].size() != 0 ? detail.res.res[i][detail.res.res[i].size() - 1] : multi1 - 1 - i;
+		for (int i = 0; i < detail.res.lines.size(); i++){
+			int last = detail.res.lines[i].res.size() != 0 ? detail.res.lines[i].res.back() : multi1 - 1 - i;
 			points.push_back(last);
 		}
 		std::sort(points.begin(), points.end());
@@ -72,8 +72,8 @@ namespace heaphash {
 	double heaphash::find(data::detaildata &detail){
 		unsigned long long hash1 = 0, hash2 = 0;
 		std::vector<int> points;
-		for (int i = 0; i < detail.res.res.size(); i++){
-			int last = detail.res.res[i].size() != 0 ? detail.res.res[i][detail.res.res[i].size() - 1] : multi1 - 1 - i;
+		for (int i = 0; i < detail.res.lines.size(); i++){
+			int last = detail.res.lines[i].res.size() != 0 ? detail.res.lines[i].res.back() : multi1 - 1 - i;
 			points.push_back(last);
 		}
 		std::sort(points.begin(), points.end());

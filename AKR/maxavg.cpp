@@ -18,18 +18,17 @@ namespace maxavg{
 	}
 	data::detaildata* maxclass::tryadddetail(const std::vector<data::mappoint> &mappoints, const data::query &query, data::detaildata &nowdetail, geo::point endpoint, double nowbest, int addpoint, int startpoint) {
 		geo::point p = query.start[startpoint];
-		if (nowdetail.res.res[startpoint].size() != 0)
-			p = mappoints[*(--nowdetail.res.res[startpoint].end())].p;
+		if (nowdetail.res.lines[startpoint].res.size() != 0)
+			p = mappoints[nowdetail.res.lines[startpoint].res.back()].p;
 		geo::point midpoint = mappoints[addpoint].p;
-		double nowlength = nowdetail.res.length[startpoint] - (p - endpoint).len() + (p - midpoint).len() + (midpoint - endpoint).len();
+		double nowlength = nowdetail.res.lines[startpoint].length - (p - endpoint).len() + (p - midpoint).len() + (midpoint - endpoint).len();
 		if (nowlength > nowbest)
 			return nullptr;
 		auto adddetailptr = new data::detaildata(nowdetail);
 		auto &adddetail = *adddetailptr;
-		auto oldlength = adddetail.res.length[startpoint];
-		adddetail.res.length[startpoint] = nowlength;
+		adddetail.res.lines[startpoint].length = nowlength;
 		updatereslength(adddetail, nowlength);
-		adddetail.res.res[startpoint].push_back(addpoint);
+		adddetail.res.lines[startpoint].res.push_back(addpoint);
 		for (int detailnum = 0; detailnum < adddetail.category.size(); detailnum++)
 			if (adddetail.category[detailnum] == 0)
 				for (auto have : mappoints[addpoint].category)
@@ -54,14 +53,13 @@ namespace maxavg{
 				endpointi = i;
 		}
 		res.endpoint = endpointi;
+		res.lines.resize(query.start.size());
 		auto endpoint = mappoints[endpointi].p;
-		for (auto i : query.start){
-			auto tnum = (i - endpoint).len();
-			res.length.push_back(tnum);
+		for (int i = 0; i < query.start.size(); i++){
+			auto tnum = (query.start[i] - endpoint).len();
+			res.lines[i].length = tnum;
 			if (res.reslength < tnum)
 				res.reslength = tnum;
-			std::vector<int> v;
-			res.res.push_back(v);
 		}
 		std::vector<int> needpoint;
 		for (int i = 0; i < needpoints.size(); i++){
@@ -81,10 +79,10 @@ namespace maxavg{
 			doneneedpoint.push_back(0);
 		for (;;){
 			int nowmin = 0;
-			for (int i = 1; i < res.length.size(); i++)
-				if (res.length[i] < res.length[nowmin])
+			for (int i = 1; i < res.lines.size(); i++)
+				if (res.lines[i].length < res.lines[nowmin].length)
 					nowmin = i;
-			auto prev = res.res[nowmin].size() == 0 ? query.start[nowmin] : mappoints[res.res[nowmin][res.res[nowmin].size() - 1]].p;
+			auto prev = res.lines[nowmin].res.size() == 0 ? query.start[nowmin] : mappoints[res.lines[nowmin].res.back()].p;
 			int minnext = -1;
 			double minnextlen = 1e100;
 			for (int i = 0; i < needpoint.size(); i++){
@@ -103,11 +101,11 @@ namespace maxavg{
 					}
 				return res;
 			}
-			res.length[nowmin] -= (prev - endpoint).len();
-			res.length[nowmin] += minnextlen;
-			if (res.length[nowmin] > res.reslength)
-				res.reslength = res.length[nowmin];
-			res.res[nowmin].push_back(needpoint[minnext]);
+			res.lines[nowmin].length -= (prev - endpoint).len();
+			res.lines[nowmin].length += minnextlen;
+			if (res.lines[nowmin].length > res.reslength)
+				res.reslength = res.lines[nowmin].length;
+			res.lines[nowmin].res.push_back(needpoint[minnext]);
 			for (int i = 0; i < needpoint.size(); i++){
 				for (auto j : mappoints[needpoint[minnext]].category)
 					if (query.needcategory[i] == j)
@@ -130,18 +128,18 @@ namespace maxavg{
 	}
 	data::detaildata* avgclass::tryadddetail(const std::vector<data::mappoint> &mappoints, const data::query &query, data::detaildata &nowdetail, geo::point endpoint, double nowbest, int addpoint, int startpoint) {
 		geo::point p = query.start[startpoint];
-		if (nowdetail.res.res[startpoint].size() != 0)
-			p = mappoints[*(--nowdetail.res.res[startpoint].end())].p;
+		if (nowdetail.res.lines[startpoint].res.size() != 0)
+			p = mappoints[nowdetail.res.lines[startpoint].res.back()].p;
 		geo::point midpoint = mappoints[addpoint].p;
 		double deltalength = (p - midpoint).len() + (midpoint - endpoint).len() - (p - endpoint).len();
 		if (nowdetail.res.reslength + deltalength > nowbest)
 			return nullptr;
 		auto adddetailptr = new data::detaildata(nowdetail);
 		auto &adddetail = *adddetailptr;
-		auto oldlength = adddetail.res.length[startpoint];
-		adddetail.res.length[startpoint] += deltalength;
+		auto oldlength = adddetail.res.lines[startpoint].length;
+		adddetail.res.lines[startpoint].length += deltalength;
 		updatereslength(adddetail, deltalength);
-		adddetail.res.res[startpoint].push_back(addpoint);
+		adddetail.res.lines[startpoint].res.push_back(addpoint);
 		for (int detailnum = 0; detailnum < adddetail.category.size(); detailnum++)
 			if (adddetail.category[detailnum] == 0)
 				for (auto have : mappoints[addpoint].category)
@@ -166,13 +164,12 @@ namespace maxavg{
 				endpointi = i;
 		}
 		res.endpoint = endpointi;
+		res.lines.resize(query.start.size());
 		auto endpoint = mappoints[endpointi].p;
-		for (auto i : query.start){
-			auto tnum = (i - endpoint).len();
-			res.length.push_back(tnum);
+		for (int i = 0; i < query.start.size(); i++){
+			auto tnum = (query.start[i] - endpoint).len();
+			res.lines[i].length = tnum;
 			res.reslength += tnum;
-			std::vector<int> v;
-			res.res.push_back(v);
 		}
 		std::vector<int> needpoint;
 		for (int i = 0; i < needpoints.size(); i++){
@@ -196,8 +193,8 @@ namespace maxavg{
 			double minnextlen = 1e100;
 			for (int j = 0; j < needpoint.size(); j++){
 				if (doneneedpoint[j]) continue;
-				for (int i = 0; i < res.length.size(); i++){
-					auto p = res.res[i].size() == 0 ? query.start[i] : mappoints[res.res[i][res.res[i].size() - 1]].p;
+				for (int i = 0; i < res.lines.size(); i++){
+					auto p = res.lines[i].res.size() == 0 ? query.start[i] : mappoints[res.lines[i].res.back()].p;
 					auto deltadis = (mappoints[needpoint[j]].p - endpoint).len() + (mappoints[needpoint[j]].p - p).len() - (p - center).len();
 					if (deltadis < minnextlen){
 						minnextlen = deltadis;
@@ -214,9 +211,9 @@ namespace maxavg{
 					}
 				return res;
 			}
-			res.length[minline] += minnextlen;
+			res.lines[minline].length += minnextlen;
 			res.reslength += minnextlen;
-			res.res[minline].push_back(needpoint[minnext]);
+			res.lines[minline].res.push_back(needpoint[minnext]);
 			for (int i = 0; i < needpoint.size(); i++){
 				for (auto j : mappoints[needpoint[minnext]].category)
 					if (query.needcategory[i] == j)

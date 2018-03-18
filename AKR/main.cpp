@@ -25,12 +25,12 @@ void multitests(int times, double &trueclock, double &greedyclock, double &greed
 			query.write(buffer);
 		}
 		int startclock = clock();
-		data::result oldtrueres = old<USEDCLASS>::trueway(mappoints, query);
+		data::result oldtrueres = old<USEDCLASS>::exactway1(mappoints, query);
 		sprintf(buffer, DATAFOLDER "/random/result/%06d.txt", i);
 		oldtrueres.write(buffer, &query);
 		trueclock += clock() - startclock;
 		startclock = clock();
-		data::result oldgreedyres = old<USEDCLASS>::greedyway(mappoints, query);
+		data::result oldgreedyres = old<USEDCLASS>::naivegreedyway(mappoints, query);
 		assert(oldtrueres.reslength <= oldgreedyres.reslength * (1 + 1e-8) + 1e-8);
 		greedyclock += clock() - startclock;
 		greedypoint += oldgreedyres.reslength / oldtrueres.reslength;

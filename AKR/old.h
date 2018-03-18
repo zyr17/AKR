@@ -7,8 +7,8 @@ public:
 	static data::result getdetail(const std::vector<data::mappoint> &mappoints, const data::query &query, const std::vector<std::vector<int>> &needpoints, int nowend, double nowbest);
 	static std::vector<int> getendpoints(const std::vector<data::mappoint> &mappoints, const data::query &query);
 	static std::vector<std::vector<int>> getneedpoints(const std::vector<data::mappoint> &mappoints, const data::query &query);
-	static data::result trueway(const std::vector<data::mappoint> &mappoints, const data::query &query);
-	static data::result greedyway(const std::vector<data::mappoint> &mappoints, const data::query &query);
+	static data::result exactway1(const std::vector<data::mappoint> &mappoints, const data::query &query);
+	static data::result naivegreedyway(const std::vector<data::mappoint> &mappoints, const data::query &query);
 };
 template <class T> data::result old<T>::getdetail(const std::vector<data::mappoint> &mappoints, const data::query &query, const std::vector<std::vector<int>> &needpoints, int nowend, double nowbest){
 	int needtot = 0;
@@ -28,11 +28,10 @@ template <class T> data::result old<T>::getdetail(const std::vector<data::mappoi
 				tdetail->category[i] = 1;
 	tdetail->res.reslength = 0;
 	tdetail->res.endpoint = nowend;
-	for (auto i : query.start){
-		std::vector<int> tvec;
-		tdetail->res.res.push_back(tvec);
-		double tdouble = (i - mappoints[nowend].p).len();
-		tdetail->res.length.push_back(tdouble);
+	tdetail->res.lines.resize(query.start.size());
+	for (int i = 0; i < query.start.size(); i++){
+		double tdouble = (query.start[i] - mappoints[nowend].p).len();
+		tdetail->res.lines[i].length = tdouble;
 		T::updatereslength(*tdetail, tdouble);
 	}
 	heap.push_back(tdetail);
@@ -106,7 +105,7 @@ template <class T> std::vector<std::vector<int>> old<T>::getneedpoints(const std
 				}
 	return res;
 }
-template <class T> data::result old<T>::trueway(const std::vector<data::mappoint> &mappoints, const data::query &query){
+template <class T> data::result old<T>::exactway1(const std::vector<data::mappoint> &mappoints, const data::query &query){
 	auto endpoints = getendpoints(mappoints, query);
 	auto needpoints = getneedpoints(mappoints, query);
 	data::result res;
@@ -121,7 +120,7 @@ template <class T> data::result old<T>::trueway(const std::vector<data::mappoint
 	}
 	return res;
 }
-template <class T> data::result old<T>::greedyway(const std::vector<data::mappoint> &mappoints, const data::query &query){
+template <class T> data::result old<T>::naivegreedyway(const std::vector<data::mappoint> &mappoints, const data::query &query){
 	auto endpoints = getendpoints(mappoints, query);
 	auto needpoints = getneedpoints(mappoints, query);
 	return T::naivegreedy(mappoints, query, endpoints, needpoints);

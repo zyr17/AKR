@@ -49,10 +49,10 @@ namespace data {
 		resstr += buffer;
 		sprintf(buffer, "endpoint: %d\n", endpoint);
 		resstr += buffer;
-		for (int i = 0; i < length.size(); i++){
-			sprintf(buffer, "route ID %d, length: %.6f\nroute:", i, length[i]);
+		for (int i = 0; i < lines.size(); i++){
+			sprintf(buffer, "route ID %d, length: %.6f\nroute:", i, lines[i].length);
 			resstr += buffer;
-			for (auto j : res[i]){
+			for (auto j : lines[i].res){
 				sprintf(buffer, " %d", j);
 				resstr += buffer;
 			}

@@ -5,12 +5,14 @@
 template <class T> class old {
 public:
 	static data::result getdetail(const std::vector<data::mappoint> &mappoints, const data::query &query, const std::vector<std::vector<int>> &needpoints, int nowend, double nowbest);
-	static std::vector<int> getendpoints(const std::vector<data::mappoint> &mappoints, const data::query &query);
+	static std::vector<int> getendpoints(const std::vector<data::mappoint> &mappoints, const data::query &query, double nowbest);
 	static std::vector<std::vector<int>> getneedpoints(const std::vector<data::mappoint> &mappoints, const data::query &query);
+	static std::vector<std::vector<int>> old<T>::filtneedpoints(const std::vector<data::mappoint> &mappoints, const data::query &query, const std::vector<std::vector<int>> &needpoints, const geo::point endpoint, double nowbest);
 	static data::result exactway1(const std::vector<data::mappoint> &mappoints, const data::query &query);
 	static data::result naivegreedyway(const std::vector<data::mappoint> &mappoints, const data::query &query);
 };
-template <class T> data::result old<T>::getdetail(const std::vector<data::mappoint> &mappoints, const data::query &query, const std::vector<std::vector<int>> &needpoints, int nowend, double nowbest){
+template <class T> data::result old<T>::getdetail(const std::vector<data::mappoint> &mappoints, const data::query &query, const std::vector<std::vector<int>> &allneedpoints, int nowend, double nowbest){
+	auto needpoints = filtneedpoints(mappoints, query, allneedpoints, mappoints[nowend].p, nowbest);
 	int needtot = 0;
 	for (auto &i : needpoints)
 		needtot += i.size();
@@ -76,9 +78,11 @@ template <class T> data::result old<T>::getdetail(const std::vector<data::mappoi
 	printf("heapcount %d\n", heapcount);
 	return tres;
 }
-template <class T> std::vector<int> old<T>::getendpoints(const std::vector<data::mappoint> &mappoints, const data::query &query){
+template <class T> std::vector<int> old<T>::getendpoints(const std::vector<data::mappoint> &mappoints, const data::query &query, double nowbest){
 	std::vector<int> res;
 	for (auto &mappoint : mappoints){
+		if (T::getenddis(query, mappoint.p) >= nowbest)
+			continue;
 		unsigned long long ull = 1LL << query.endcategory.size();
 		for (auto i : query.endcategory){
 			for (auto j : mappoint.category)
@@ -105,11 +109,21 @@ template <class T> std::vector<std::vector<int>> old<T>::getneedpoints(const std
 				}
 	return res;
 }
+template <class T> std::vector<std::vector<int>> old<T>::filtneedpoints(const std::vector<data::mappoint> &mappoints, const data::query &query, const std::vector<std::vector<int>> &needpoints, const geo::point endpoint, double nowbest){
+	std::vector<std::vector<int>> res;
+	for (auto i : needpoints){
+		std::vector<int> tvec;
+		for (auto j : i)
+			if (T::getminpassdis(query, endpoint, mappoints[j].p) < nowbest)
+				tvec.push_back(j);
+		res.push_back(tvec);
+	}
+	return res;
+}
 template <class T> data::result old<T>::exactway1(const std::vector<data::mappoint> &mappoints, const data::query &query){
-	auto endpoints = getendpoints(mappoints, query);
+	data::result res = naivegreedyway(mappoints, query);
+	auto endpoints = getendpoints(mappoints, query, res.reslength);
 	auto needpoints = getneedpoints(mappoints, query);
-	data::result res;
-	res.reslength = 1e100;
 	ann::ann<T> ann(mappoints, query);
 	for (;;){
 		int nowend = ann.nextsmallest(res.reslength);
@@ -121,7 +135,7 @@ template <class T> data::result old<T>::exactway1(const std::vector<data::mappoi
 	return res;
 }
 template <class T> data::result old<T>::naivegreedyway(const std::vector<data::mappoint> &mappoints, const data::query &query){
-	auto endpoints = getendpoints(mappoints, query);
+	auto endpoints = getendpoints(mappoints, query, 1e100);
 	auto needpoints = getneedpoints(mappoints, query);
 	return T::naivegreedy(mappoints, query, endpoints, needpoints);
 }

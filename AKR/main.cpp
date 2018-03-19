@@ -6,10 +6,16 @@
 #include "old.h"
 #include "test.h"
 #include "maxavg.h"
+#if 1
 #define DATAFOLDER "../Data/gaode/"
 #define RANDOMNUM 100
 #define MAPPOINTFILE "small.txt"
-typedef maxavg::avgclass USEDCLASS;
+#else
+#define DATAFOLDER "../Data/naive/"
+#define RANDOMNUM 8
+#define MAPPOINTFILE "data.txt"
+#endif
+typedef maxavg::maxclass USEDCLASS;
 void multitests(int times, double &trueclock, double &greedyclock, double &greedypoint, std::vector<data::mappoint> &mappoints, std::map<std::string, int> &words2num, std::vector<data::query> &randomed, bool forcerandom = false){
 	trueclock = greedyclock = greedypoint = 0;
 	for (int i = 1; i <= times; i++){
@@ -31,7 +37,11 @@ void multitests(int times, double &trueclock, double &greedyclock, double &greed
 		trueclock += clock() - startclock;
 		startclock = clock();
 		data::result oldgreedyres = old<USEDCLASS>::naivegreedyway(mappoints, query);
-		assert(oldtrueres.reslength <= oldgreedyres.reslength * (1 + 1e-8) + 1e-8);
+		//printf("%f %f\n", oldtrueres.reslength, oldgreedyres.reslength);
+		if (oldtrueres.reslength > oldgreedyres.reslength * (1 + 1e-8) + 1e-8){
+			printf("greedy wrong in %d\n", i);
+			for (;;);
+		}
 		greedyclock += clock() - startclock;
 		greedypoint += oldgreedyres.reslength / oldtrueres.reslength;
 	}

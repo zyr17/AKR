@@ -113,6 +113,15 @@ namespace maxavg{
 			}
 		}
 	}
+	double maxclass::getminpassdis(const data::query &query, geo::point endpoint, geo::point midpoint){
+		double res = 1e100;
+		for (auto i : query.start){
+			double now = (i - midpoint).len();
+			if (now < res)
+				res = now;
+		}
+		return res + (midpoint - endpoint).len();
+	}
 
 	bool avgclass::outcheck(const geo::point &pointnum, const geo::point &center, double nowbest, double minr, double sigmar, int n){
 		return n * (pointnum - center).len() >= nowbest + sigmar;
@@ -195,7 +204,7 @@ namespace maxavg{
 				if (doneneedpoint[j]) continue;
 				for (int i = 0; i < res.lines.size(); i++){
 					auto p = res.lines[i].res.size() == 0 ? query.start[i] : mappoints[res.lines[i].res.back()].p;
-					auto deltadis = (mappoints[needpoint[j]].p - endpoint).len() + (mappoints[needpoint[j]].p - p).len() - (p - center).len();
+					auto deltadis = (mappoints[needpoint[j]].p - endpoint).len() + (mappoints[needpoint[j]].p - p).len() - (p - endpoint).len();
 					if (deltadis < minnextlen){
 						minnextlen = deltadis;
 						minline = i;
@@ -220,5 +229,16 @@ namespace maxavg{
 						doneneedpoint[i] = 1;
 			}
 		}
+	}
+	double avgclass::getminpassdis(const data::query &query, geo::point endpoint, geo::point midpoint){
+		double res = 1e100, tot = 0;
+		for (auto i : query.start)
+			tot += (i - endpoint).len();
+		for (auto i : query.start){
+			double now = tot - (i - endpoint).len() + (i - midpoint).len() + (midpoint - endpoint).len();
+			if (now < res)
+				res = now;
+		}
+		return res;
 	}
 }

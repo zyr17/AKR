@@ -1,14 +1,50 @@
 #include "taskfinish.h"
 namespace taskfinish{
+	onelinehash::onelinehash(int categorynumber){
+		left = categorynumber / 2;
+		right = categorynumber - left;
+		for (int i = 1 << left; i--;){
+			std::vector<data::oneline*> vec;
+			vec.resize(1 << right);
+			min.push_back(vec);
+		}
+	}
+	void onelinehash::insert(data::oneline *number){
+		int category = number->category;
+		int lnum = category & ((1 << left) - 1), rnum = category >> left;
+		for (int i = lnum;; i = (i - 1) & lnum){
+			if (min[i][rnum] == nullptr)
+				min[i][rnum] = new data::oneline(*number);
+			if (!i) break;
+		}
+	}
+	data::oneline* onelinehash::findmin(int category) const{
+		//printf("%x\n", this);
+		int lnum = category & ((1 << left) - 1), rnum = category >> left;
+		//printf("%d %d %d %d\n", left, right, lnum, rnum);
+		data::oneline *res = nullptr;
+		rnum ^= (1 << right) - 1;
+		for (int i = rnum;; i = (i - 1) & rnum){
+			int update = i ^ ((1 << right) - 1);
+			if (min[lnum][update] != nullptr && (res == nullptr || min[lnum][update]->length < res->length))
+				res = min[lnum][update];
+			if (!i) break;
+		}
+		return res;
+	}
+	data::oneline* onelinehash::operator[](int category) const{
+		return findmin(category);
+	}
+
 	taskfinish::taskfinish(const std::vector<data::mappoint> &inmappoints, const data::query &inquery, const std::vector<std::vector<int>> &inneedpoints, int inm){
 		query = inquery;
 		mappoints = &inmappoints;
 		needpoints = &inneedpoints;
 		m = inm;
-		starts.resize(query.start.size());
+		auto o = onestart(query.needcategory.size());
+		starts.resize(query.start.size(), o);
 		for (int num = 0; num < query.start.size(); num++){
 			auto &i = starts[num];
-			i.pre.resize(1 << query.needcategory.size());
 			auto o = new data::oneline;
 			o->category = 0;
 			o->length = (inmappoints[m].p - query.start[num]).len();
@@ -43,10 +79,11 @@ namespace taskfinish{
 			auto &heap = start.heap;
 			auto &hash = start.hash;
 			auto &pre = start.pre;
-			if (start.pre[needcate[i]] != nullptr){
-				addtores(res, pre[needcate[i]]);
-				if (pre[needcate[i]]->length > llow)
-					llow = pre[needcate[i]]->length;
+			if (pre[needcate[i]] != nullptr){
+				auto preget = pre[needcate[i]];
+				addtores(res, preget);
+				if (preget->length > llow)
+					llow = preget->length;
 			}
 			else{
 				for (;;){
@@ -70,9 +107,8 @@ namespace taskfinish{
 					else hash.insert(hashed);
 					bool terminate = 0;
 					if (pre[nowline->category] == nullptr){
-						auto copy = new data::oneline(*nowline);
 						//TODO 最好有heaphash类似操作?
-						pre[nowline->category] = copy;
+						pre.insert(nowline);
 						if (nowline->length > llow)
 							llow = nowline->length;
 						if ((nowline->category & needcate[i]) == needcate[i]){
@@ -101,37 +137,6 @@ namespace taskfinish{
 					if (terminate) break;
 				}
 			}
-		}
-		return res;
-	}
-
-	onelinehash::onelinehash(int categorynumber){
-		left = categorynumber / 2;
-		right = categorynumber - left;
-		for (int i = 1 << left; i--;){
-			std::vector<data::oneline*> vec;
-			vec.resize(1 << right);
-			min.push_back(vec);
-		}
-	}
-	void onelinehash::insert(int category, data::oneline *number){
-		int lnum = category & ((1 << left) - 1), rnum = category >> left;
-		for (int i = lnum;; i = (i - 1) & lnum){
-			min[i][rnum] = new data::oneline(*number);
-			if (!i) break;
-		}
-	}
-	data::oneline* onelinehash::findmin(int category) const{
-		//printf("%x\n", this);
-		int lnum = category & ((1 << left) - 1), rnum = category >> left;
-		//printf("%d %d %d %d\n", left, right, lnum, rnum);
-		data::oneline *res = nullptr;
-		rnum ^= (1 << right) - 1;
-		for (int i = rnum;; i = (i - 1) & rnum){
-			int update = i ^ ((1 << right) - 1);
-			if (min[lnum][update] != nullptr && (res == nullptr || min[lnum][update]->length < res->length))
-				res = min[lnum][update];
-			if (!i) break;
 		}
 		return res;
 	}

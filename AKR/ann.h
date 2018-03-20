@@ -9,7 +9,7 @@ namespace ann {
 	template <class T> class ann {
 		std::vector<int> mindistance, endorder;
 		std::vector<double> enddis;
-		std::vector<data::mappoint> mappoints;
+		const std::vector<data::mappoint> *mappoints;
 		data::query query;
 		double centerr, minr, sigmar;
 		geo::point center;
@@ -21,7 +21,7 @@ namespace ann {
 	};
 	template <class T> ann<T>::ann(const std::vector<data::mappoint> &inmappoints, const data::query &inquery){
 		auto stc = clock();
-		mappoints = inmappoints;
+		mappoints = &inmappoints;
 		query = inquery;
 		center = geo::findcircle(inquery.start);
 		//printf("ann::findcircle %lld\n", clock() - stc);
@@ -51,9 +51,9 @@ namespace ann {
 		int nowbesti = -1;
 		for (int i = 0; i < endorder.size(); i++){
 			if (enddis[i] == -2) continue;
-			if (T::outcheck(mappoints[endorder[i]].p, center, nowbest, minr, sigmar, query.start.size())) break;
+			if (T::outcheck((*mappoints)[endorder[i]].p, center, nowbest, minr, sigmar, query.start.size())) break;
 			if (enddis[i] == -1)
-				enddis[i] = T::getenddis(query, mappoints[endorder[i]].p);
+				enddis[i] = T::getenddis(query, (*mappoints)[endorder[i]].p);
 			if (enddis[i] < nowbest){
 				nowbest = enddis[i];
 				nowbesti = i;
@@ -62,6 +62,6 @@ namespace ann {
 		if (nowbesti == -1)
 			return -1;
 		enddis[nowbesti] = -2;
-		return nowbesti == -1 ? -1 : endorder[nowbesti];
+		return endorder[nowbesti];
 	}
 }

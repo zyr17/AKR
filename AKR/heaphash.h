@@ -11,9 +11,7 @@ namespace heaphash {
 	public:
 		unsigned long long hash;
 		hashvalue(int categorynumber);
-		hashvalue(){
-			assert(0);
-		}
+		hashvalue(){}
 		void insert(std::vector<bool> &categoryvec, double number);
 		double findmin(std::vector<bool> &categoryvec) const;
 	};

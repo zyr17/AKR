@@ -3,7 +3,7 @@
 #include <ctime>
 #include <direct.h>
 #include "init.h"
-#include "old.h"
+#include "funcs.h"
 #include "test.h"
 #include "maxavg.h"
 #if 1
@@ -18,7 +18,7 @@
 typedef maxavg::maxclass USEDCLASS;
 void multitests(int times, double &trueclock, double &greedyclock, double &greedypoint, std::vector<data::mappoint> &mappoints, std::map<std::string, int> &words2num, std::vector<data::query> &randomed, bool forcerandom = false){
 	trueclock = greedyclock = greedypoint = 0;
-	for (int i = 1; i <= times; i++){
+	for (int i = 16; i <= times; i++){
 		char buffer[1000] = { 0 };
 		printf("multitest doing %d\n", i);
 		data::query query;
@@ -31,12 +31,12 @@ void multitests(int times, double &trueclock, double &greedyclock, double &greed
 			query.write(buffer);
 		}
 		int startclock = clock();
-		data::result oldtrueres = old<USEDCLASS>::exactway1(mappoints, query);
+		data::result oldtrueres = funcs<USEDCLASS>::exactway2(mappoints, query);
 		sprintf(buffer, DATAFOLDER "/random/result/%06d.txt", i);
 		oldtrueres.write(buffer, &query);
 		trueclock += clock() - startclock;
 		startclock = clock();
-		data::result oldgreedyres = old<USEDCLASS>::naivegreedyway(mappoints, query);
+		data::result oldgreedyres = funcs<USEDCLASS>::naivegreedyway(mappoints, query);
 		//printf("%f %f\n", oldtrueres.reslength, oldgreedyres.reslength);
 		if (oldtrueres.reslength > oldgreedyres.reslength * (1 + 1e-8) + 1e-8){
 			printf("greedy wrong in %d\n", i);

@@ -24,6 +24,7 @@ namespace data {
 	struct oneline {
 		std::vector<int> res;
 		double length;
+		unsigned long long category;
 	};
 	struct result {
 		double reslength;

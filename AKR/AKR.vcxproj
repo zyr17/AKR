@@ -150,6 +150,7 @@
     <ClCompile Include="init.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="maxavg.cpp" />
+    <ClCompile Include="taskfinish.cpp" />
     <ClCompile Include="test.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -159,7 +160,8 @@
     <ClInclude Include="heaphash.h" />
     <ClInclude Include="init.h" />
     <ClInclude Include="maxavg.h" />
-    <ClInclude Include="old.h" />
+    <ClInclude Include="funcs.h" />
+    <ClInclude Include="taskfinish.h" />
     <ClInclude Include="test.h" />
   </ItemGroup>
   <ItemGroup>

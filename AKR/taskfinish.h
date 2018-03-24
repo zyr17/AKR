@@ -28,9 +28,9 @@ namespace taskfinish{
 		const std::vector<std::vector<int>> *needpoints;
 		int m;
 		std::vector<onestart> starts;
-		static void addtores(data::result &res, data::oneline *line);
+		//static void addtores(data::result &res, data::oneline *line);
 		void lineappend(geo::point start, data::oneline *line, int p);
-		bool smallthanlup(double res, double line, double lup);
+		//bool smallthanlup(double res, double line, double lup);
 	public:
 		taskfinish(const std::vector<data::mappoint> &inmappoints, const data::query &inquery, const std::vector<std::vector<int>> &inneedpoints, int inm);
 		data::result get(const std::vector<int> &belong, double lup);
@@ -50,11 +50,11 @@ namespace taskfinish{
 			i.heap.push_back(o);
 		}
 	}
-	template <class T> void taskfinish<T>::addtores(data::result &res, data::oneline *line){
+	/*template <class T> void taskfinish<T>::addtores(data::result &res, data::oneline *line){
 		res.lines.push_back(*line);
 		if (res.reslength < line->length)
 			res.reslength = line->length;
-	}
+	}*/
 	template <class T> void taskfinish<T>::lineappend(geo::point start, data::oneline *line, int p){
 		geo::point endp = line->res.size() ? (*mappoints)[line->res.back()].p : start;
 		line->length -= (endp - (*mappoints)[m].p).len();
@@ -66,9 +66,9 @@ namespace taskfinish{
 					line->category |= 1 << i;
 		line->res.push_back(p);
 	}
-	template <class T> bool taskfinish<T>::smallthanlup(double res, double line, double lup){
+	/*template <class T> bool taskfinish<T>::smallthanlup(double res, double line, double lup){
 		return (res > line ? res : line) < lup;
-	}
+	}*/
 	template <class T> data::result taskfinish<T>::get(const std::vector<int> &belong, double lup){
 		data::result res;
 		res.endpoint = m;
@@ -84,7 +84,7 @@ namespace taskfinish{
 			auto &pre = start.pre;
 			if (pre[needcate[i]] != nullptr){
 				auto preget = pre[needcate[i]];
-				addtores(res, preget);
+				T::addtores(res, preget);
 				//if (preget->length > llow)
 				//	llow = preget->length;
 			}
@@ -100,7 +100,7 @@ namespace taskfinish{
 					heap.pop_back();
 					bool terminate = 0;
 					//if (nowline->length >= lup){
-					if (!smallthanlup(res.reslength, nowline->length, lup)){
+					if (!T::smallthanlup(res.reslength, nowline->length, lup)){
 						res.reslength = 1e100;
 						terminate = 1;
 					}
@@ -116,7 +116,7 @@ namespace taskfinish{
 						//	llow = nowline->length;
 						if ((nowline->category & needcate[i]) == needcate[i]){
 							terminate = 1;
-							addtores(res, nowline);
+							T::addtores(res, nowline);
 						}
 					}
 					for (int need = 0; need < query.needcategory.size(); need++){
@@ -124,14 +124,14 @@ namespace taskfinish{
 							for (auto p : (*needpoints)[need]){
 								auto copy = new data::oneline(*nowline);
 								lineappend(query.start[i], copy, p);
-								//当该条路径过长，单条超出lup时不必加入堆。avg下预测不会有效果。由于考虑单条将res量置零不然会导致结果不完整
-								if (smallthanlup(0, copy->length, lup)){
+								//当该条路径过长，单条超出lup时不必加入堆。avg下预测不会有效果。由于考虑单条将res量置零不然会导致堆枚举不完整
+								if (T::smallthanlup(0, copy->length, lup)){
 									heap.push_back(copy);
 									std::push_heap(heap.begin(), heap.end(), cmp);
 									//在oneline加入heap时便检查是不是可用于构造最优解。avg无法采用此剪枝，简单测试效果不佳故舍弃
 									/*if (copy->length < llow && (copy->category & needcate[i]) == needcate[i] && !terminate){
 										terminate = 1;
-										addtores(res, copy);
+										T::addtores(res, copy);
 									}*/
 								}
 								else delete copy;

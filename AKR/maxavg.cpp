@@ -122,6 +122,14 @@ namespace maxavg{
 		}
 		return res + (midpoint - endpoint).len();
 	}
+	void maxclass::addtores(data::result &res, data::oneline *line){
+		res.lines.push_back(*line);
+		if (res.reslength < line->length)
+			res.reslength = line->length;
+	}
+	bool maxclass::smallthanlup(double res, double line, double lup){
+		return (res > line ? res : line) < lup;
+	}
 
 	bool avgclass::outcheck(const geo::point &pointnum, const geo::point &center, double nowbest, double minr, double sigmar, int n){
 		return n * (pointnum - center).len() >= nowbest + sigmar;

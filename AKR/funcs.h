@@ -138,6 +138,7 @@ template <class T> data::result funcs<T>::exactway1(const std::vector<data::mapp
 }
 template <class T> data::result funcs<T>::exactway2(const std::vector<data::mappoint> &mappoints, const data::query &query){
 	data::result res = naivegreedyway(mappoints, query);
+	//low:全部直接连，理论最小值 up:目前最优解的值
 	double llow = 0, &lup = res.reslength;
 	auto endpoints = getendpoints(mappoints, query, res.reslength);
 	auto allneedpoints = getneedpoints(mappoints, query);
@@ -152,13 +153,14 @@ template <class T> data::result funcs<T>::exactway2(const std::vector<data::mapp
 		for (auto &i : needpoints)
 			if (!i.size()) flag = 1;
 		if (flag) continue;
-		taskfinish::taskfinish taskfinish(mappoints, query, needpoints, nowend);
+		taskfinish::taskfinish<T> taskfinish(mappoints, query, needpoints, nowend);
 		std::vector<int> belong;
 		belong.resize(query.needcategory.size());
 		for (;;){
-			data::result nowres = taskfinish.get(belong, llow, lup);
+			data::result nowres = taskfinish.get(belong, lup);
 			if (nowres.reslength < lup){
 				res = nowres;
+				//max下，两者相等那么已经有最优解可以不继续枚举；avg下需要中途点完全没有绕路，基本无效但是基本没有代价
 				if (lup == llow)
 					return res;
 			}

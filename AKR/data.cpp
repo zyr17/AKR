@@ -1,7 +1,6 @@
 #include "data.h"
 namespace data {
 	void query::write(std::string filename){
-		
 		FILE *f = fopen(filename.c_str(), "w");
 		fprintf(f, writestr().c_str());
 		fclose(f);

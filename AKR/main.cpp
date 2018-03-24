@@ -8,7 +8,7 @@
 #include "maxavg.h"
 #if 1
 #define DATAFOLDER "../Data/gaode/"
-#define RANDOMNUM 100
+#define RANDOMNUM 1000
 #define MAPPOINTFILE "small.txt"
 #else
 #define DATAFOLDER "../Data/naive/"

@@ -54,6 +54,7 @@ namespace init {
 				if (i == tnum) inend = 1;
 			if (!inend) res.needcategory.push_back(tnum);
 		}
+		fclose(f);
 		return res;
 	}
 	data::query randomquery(int startpointnum, int endcategorynum, int needcategorynum, std::vector<data::mappoint> &mappoints, std::map<std::string, int>& words2num)

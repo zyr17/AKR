@@ -56,10 +56,15 @@ template <class T> data::result funcs<T>::getdetail(const std::vector<data::mapp
 		std::pop_heap(heap.begin(), heap.end(), cmp);
 		heap.pop_back();
 		double nowmin = hh.find(nowdetail);
-		if (nowmin < nowdetail.res.reslength) continue;
+		if (nowmin < nowdetail.res.reslength){ 
+			delete &nowdetail;
+			continue; 
+		}
 		hh.insert(nowdetail);
-		if (nowdetail.res.reslength > nowbest)
+		if (nowdetail.res.reslength > nowbest){
+			delete &nowdetail;
 			continue;
+		}
 		bool haszero = 0;
 		for (int i = 0; i < needpoints.size(); i++)
 			if (nowdetail.category[i] == 0){
@@ -74,9 +79,13 @@ template <class T> data::result funcs<T>::getdetail(const std::vector<data::mapp
 			}
 		if (!haszero){
 			tres = nowdetail.res;
+			delete &nowdetail;
 			break;
 		}
+		delete &nowdetail;
 	}
+	for (auto i : heap)
+		delete i;
 	printf("heapcount %d\n", heapcount);
 	return tres;
 }

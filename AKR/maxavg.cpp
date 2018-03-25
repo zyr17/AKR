@@ -38,20 +38,10 @@ namespace maxavg{
 					}
 		return adddetailptr;
 	}
-	data::result maxclass::naivegreedy(const std::vector<data::mappoint> &mappoints, const data::query &query, const std::vector<int> &endpoints, const std::vector<std::vector<int>> &needpoints){
+	data::result maxclass::onenaivegreedy(const std::vector<data::mappoint> &mappoints, const data::query &query, int endpointi, const std::vector<std::vector<int>> &needpoints){
 		data::result res;
 		res.reslength = 0;
 		geo::point center = geo::findcircle(query.start);
-		if (endpoints.size() == 0){
-			res.reslength = 1e100;
-			return res;
-		}
-		auto endpointi = endpoints[0];
-		for (auto i : endpoints){
-			auto p = mappoints[i].p;
-			if ((p - center).len() < (mappoints[endpointi].p - center).len())
-				endpointi = i;
-		}
 		res.endpoint = endpointi;
 		res.lines.resize(query.start.size());
 		auto endpoint = mappoints[endpointi].p;
@@ -113,6 +103,22 @@ namespace maxavg{
 			}
 		}
 	}
+	data::result maxclass::naivegreedy(const std::vector<data::mappoint> &mappoints, const data::query &query, const std::vector<int> &endpoints, const std::vector<std::vector<int>> &needpoints){
+		data::result res;
+		res.reslength = 0;
+		geo::point center = geo::findcircle(query.start);
+		if (endpoints.size() == 0){
+			res.reslength = 1e100;
+			return res;
+		}
+		auto endpointi = endpoints[0];
+		for (auto i : endpoints){
+			auto p = mappoints[i].p;
+			if ((p - center).len() < (mappoints[endpointi].p - center).len())
+				endpointi = i;
+		}
+		return onenaivegreedy(mappoints, query, endpointi, needpoints);
+	}
 	double maxclass::getminpassdis(const data::query &query, geo::point endpoint, geo::point midpoint){
 		double res = 1e100;
 		for (auto i : query.start){
@@ -166,20 +172,10 @@ namespace maxavg{
 					}
 		return adddetailptr;
 	}
-	data::result avgclass::naivegreedy(const std::vector<data::mappoint> &mappoints, const data::query &query, const std::vector<int> &endpoints, const std::vector<std::vector<int>> &needpoints){
+	data::result avgclass::onenaivegreedy(const std::vector<data::mappoint> &mappoints, const data::query &query, int endpointi, const std::vector<std::vector<int>> &needpoints){
 		data::result res;
 		res.reslength = 0;
 		geo::point center = geo::findcircle(query.start);
-		if (endpoints.size() == 0){
-			res.reslength = 1e100;
-			return res;
-		}
-		auto endpointi = endpoints[0];
-		for (auto i : endpoints){
-			auto p = mappoints[i].p;
-			if ((p - center).len() < (mappoints[endpointi].p - center).len())
-				endpointi = i;
-		}
 		res.endpoint = endpointi;
 		res.lines.resize(query.start.size());
 		auto endpoint = mappoints[endpointi].p;
@@ -238,6 +234,22 @@ namespace maxavg{
 			}
 		}
 	}
+	data::result avgclass::naivegreedy(const std::vector<data::mappoint> &mappoints, const data::query &query, const std::vector<int> &endpoints, const std::vector<std::vector<int>> &needpoints){
+		data::result res;
+		res.reslength = 0;
+		geo::point center = geo::findcircle(query.start);
+		if (endpoints.size() == 0){
+			res.reslength = 1e100;
+			return res;
+		}
+		auto endpointi = endpoints[0];
+		for (auto i : endpoints){
+			auto p = mappoints[i].p;
+			if ((p - center).len() < (mappoints[endpointi].p - center).len())
+				endpointi = i;
+		}
+		return onenaivegreedy(mappoints, query, endpointi, needpoints);
+	}
 	double avgclass::getminpassdis(const data::query &query, geo::point endpoint, geo::point midpoint){
 		double res = 1e100, tot = 0;
 		for (auto i : query.start)
@@ -248,5 +260,12 @@ namespace maxavg{
 				res = now;
 		}
 		return res;
+	}
+	void avgclass::addtores(data::result &res, data::oneline *line){
+		res.lines.push_back(*line);
+		res.reslength += line->length;
+	}
+	bool avgclass::smallthanlup(double res, double line, double lup){
+		return res + line < lup;
 	}
 }

@@ -15,7 +15,7 @@
 #define RANDOMNUM 8
 #define MAPPOINTFILE "data.txt"
 #endif
-typedef maxavg::maxclass USEDCLASS;
+typedef maxavg::avgclass USEDCLASS;
 void multitests(int times, double &trueclock, double &greedyclock, double &greedypoint, std::vector<data::mappoint> &mappoints, std::map<std::string, int> &words2num, std::vector<data::query> &randomed, bool forcerandom = false){
 	trueclock = greedyclock = greedypoint = 0;
 	for (int i = 1; i <= times; i++){
@@ -36,7 +36,7 @@ void multitests(int times, double &trueclock, double &greedyclock, double &greed
 		oldtrueres.write(buffer, &query);
 		trueclock += clock() - startclock;
 		startclock = clock();
-		data::result oldgreedyres = funcs<USEDCLASS>::naivegreedyway(mappoints, query);
+		data::result oldgreedyres = funcs<USEDCLASS>::naivegreedywayplus(mappoints, query);
 		//printf("%f %f\n", oldtrueres.reslength, oldgreedyres.reslength);
 		if (oldtrueres.reslength > oldgreedyres.reslength * (1 + 1e-8) + 1e-8){
 			printf("greedy wrong in %d\n", i);

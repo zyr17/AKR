@@ -1,6 +1,7 @@
 #pragma once
 #include "geo.h"
 #include "data.h"
+#include "ann.h"
 namespace maxavg{
 	class maxclass{
 	public:
@@ -10,6 +11,7 @@ namespace maxavg{
 		static data::detaildata* tryadddetail(const std::vector<data::mappoint> &mappoints, const data::query &query, data::detaildata &nowdetail, geo::point endpoint, double nowbest, int addpoint, int startpoint);
 		static data::result onenaivegreedy(const std::vector<data::mappoint> &mappoints, const data::query &query, int endpointi, const std::vector<std::vector<int>> &needpoints);
 		static data::result naivegreedy(const std::vector<data::mappoint> &mappoints, const data::query &query, const std::vector<int> &endpoints, const std::vector<std::vector<int>> &needpoints);
+		static data::result naivegreedyplus(const std::vector<data::mappoint> &mappoints, const data::query &query, const std::vector<int> &endpoints, const std::vector<std::vector<int>> &needpoints);
 		static double getminpassdis(const data::query &query, geo::point endpoint, geo::point midpoint);
 		static void addtores(data::result &res, data::oneline *line);
 		static bool smallthanlup(double res, double line, double lup);
@@ -22,6 +24,7 @@ namespace maxavg{
 		static data::detaildata* tryadddetail(const std::vector<data::mappoint> &mappoints, const data::query &query, data::detaildata &nowdetail, geo::point endpoint, double nowbest, int addpoint, int startpoint);
 		static data::result onenaivegreedy(const std::vector<data::mappoint> &mappoints, const data::query &query, int endpointi, const std::vector<std::vector<int>> &needpoints);
 		static data::result naivegreedy(const std::vector<data::mappoint> &mappoints, const data::query &query, const std::vector<int> &endpoints, const std::vector<std::vector<int>> &needpoints);
+		static data::result naivegreedyplus(const std::vector<data::mappoint> &mappoints, const data::query &query, const std::vector<int> &endpoints, const std::vector<std::vector<int>> &needpoints);
 		static double getminpassdis(const data::query &query, geo::point endpoint, geo::point midpoint);
 		static void addtores(data::result &res, data::oneline *line);
 		static bool smallthanlup(double res, double line, double lup);

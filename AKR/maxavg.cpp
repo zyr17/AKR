@@ -119,6 +119,19 @@ namespace maxavg{
 		}
 		return onenaivegreedy(mappoints, query, endpointi, needpoints);
 	}
+	data::result maxclass::naivegreedyplus(const std::vector<data::mappoint> &mappoints, const data::query &query, const std::vector<int> &endpoints, const std::vector<std::vector<int>> &needpoints){
+		data::result res;
+		res.reslength = 1e100;
+		ann::ann<maxclass> ann(mappoints, query);
+		for (;;){
+			auto endpointi = ann.nextsmallest(res.reslength);
+			if (endpointi < 0) break;
+			auto tres = onenaivegreedy(mappoints, query, endpointi, needpoints);
+			if (tres.reslength < res.reslength)
+				res = tres;
+		}
+		return res;
+	}
 	double maxclass::getminpassdis(const data::query &query, geo::point endpoint, geo::point midpoint){
 		double res = 1e100;
 		for (auto i : query.start){
@@ -249,6 +262,19 @@ namespace maxavg{
 				endpointi = i;
 		}
 		return onenaivegreedy(mappoints, query, endpointi, needpoints);
+	}
+	data::result avgclass::naivegreedyplus(const std::vector<data::mappoint> &mappoints, const data::query &query, const std::vector<int> &endpoints, const std::vector<std::vector<int>> &needpoints){
+		data::result res;
+		res.reslength = 1e100;
+		ann::ann<avgclass> ann(mappoints, query);
+		for (;;){
+			auto endpointi = ann.nextsmallest(res.reslength);
+			if (endpointi < 0) break;
+			auto tres = onenaivegreedy(mappoints, query, endpointi, needpoints);
+			if (tres.reslength < res.reslength)
+				res = tres;
+		}
+		return res;
 	}
 	double avgclass::getminpassdis(const data::query &query, geo::point endpoint, geo::point midpoint){
 		double res = 1e100, tot = 0;

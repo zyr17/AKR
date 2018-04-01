@@ -31,19 +31,30 @@ void multitests(int times, double &trueclock, double &greedyclock, double &greed
 			query.write(buffer);
 		}
 		int startclock = clock();
-		data::result oldtrueres = funcs<USEDCLASS>::exactway2(mappoints, query);
+		data::result exactres = funcs<USEDCLASS>::exactway2(mappoints, query);
 		sprintf(buffer, DATAFOLDER "/random/result/%06d.txt", i);
-		oldtrueres.write(buffer, &query);
+		exactres.write(buffer, &query);
 		trueclock += clock() - startclock;
 		startclock = clock();
-		data::result oldgreedyres = funcs<USEDCLASS>::naivegreedywayplus(mappoints, query);
+		data::result naivegreedyres = funcs<USEDCLASS>::naivegreedywayplus(mappoints, query);
+		greedyclock += clock() - startclock;
+		startclock = clock();
+		data::result bettergreedyres = funcs<USEDCLASS>::bettergreedywayplus(mappoints, query);
+		greedyclock += clock() - startclock;
 		//printf("%f %f\n", oldtrueres.reslength, oldgreedyres.reslength);
-		if (oldtrueres.reslength > oldgreedyres.reslength * (1 + 1e-8) + 1e-8){
-			printf("greedy wrong in %d\n", i);
+		if (exactres.reslength > naivegreedyres.reslength * (1 + 1e-8) + 1e-8){
+			printf("naivegreedy wrong in %d\n", i);
 			for (;;);
 		}
-		greedyclock += clock() - startclock;
-		greedypoint += oldgreedyres.reslength / oldtrueres.reslength;
+		if (exactres.reslength > bettergreedyres.reslength * (1 + 1e-8) + 1e-8){
+			printf("bettergreedy wrong in %d\n", i);
+			for (;;);
+		}
+		/*if (bettergreedyres.reslength > naivegreedyres.reslength * (1 + 1e-8) + 1e-8){
+			printf("bettergreedy worse than naivegreedy in %d\n", i);
+			for (;;);
+		}*/
+		greedypoint += bettergreedyres.reslength / exactres.reslength;
 	}
 	trueclock /= times;
 	greedyclock /= times;

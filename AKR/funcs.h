@@ -13,6 +13,8 @@ public:
 	static data::result exactway2(const std::vector<data::mappoint> &mappoints, const data::query &query);
 	static data::result naivegreedyway(const std::vector<data::mappoint> &mappoints, const data::query &query);
 	static data::result naivegreedywayplus(const std::vector<data::mappoint> &mappoints, const data::query &query);
+	static data::result bettergreedyway(const std::vector<data::mappoint> &mappoints, const data::query &query);
+	static data::result bettergreedywayplus(const std::vector<data::mappoint> &mappoints, const data::query &query);
 };
 template <class T> data::result funcs<T>::getdetail(const std::vector<data::mappoint> &mappoints, const data::query &query, const std::vector<std::vector<int>> &allneedpoints, int nowend, double nowbest){
 	auto needpoints = filtneedpoints(mappoints, query, allneedpoints, mappoints[nowend].p, nowbest);
@@ -198,4 +200,14 @@ template <class T> data::result funcs<T>::naivegreedywayplus(const std::vector<d
 	auto endpoints = getendpoints(mappoints, query, 1e100);
 	auto needpoints = getneedpoints(mappoints, query);
 	return T::naivegreedyplus(mappoints, query, endpoints, needpoints);
+}
+template <class T> data::result funcs<T>::bettergreedyway(const std::vector<data::mappoint> &mappoints, const data::query &query){
+	auto endpoints = getendpoints(mappoints, query, 1e100);
+	auto needpoints = getneedpoints(mappoints, query);
+	return T::bettergreedy(mappoints, query, endpoints, needpoints);
+}
+template <class T> data::result funcs<T>::bettergreedywayplus(const std::vector<data::mappoint> &mappoints, const data::query &query){
+	auto endpoints = getendpoints(mappoints, query, 1e100);
+	auto needpoints = getneedpoints(mappoints, query);
+	return T::bettergreedyplus(mappoints, query, endpoints, needpoints);
 }

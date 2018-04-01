@@ -1,5 +1,17 @@
 #include "maxavg.h"
 namespace maxavg{
+	heapunit heapunit::makeheapunit(const std::vector<data::mappoint> &mappoints, int p1, int p2, int pmid, int linenum, const geo::point &startpoint){
+		heapunit hu;
+		hu.p1 = p1;
+		hu.p2 = p2;
+		hu.pmid = pmid;
+		hu.linenum = linenum;
+		geo::point start = p1 == -1 ? startpoint : mappoints[p1].p;
+		geo::point end = mappoints[p2].p, mid = mappoints[pmid].p;
+		auto part1 = (start - mid).len(), part2 = (end - mid).len(), old = (start - end).len();
+		hu.length = part1 + part2 - old;
+		return hu;
+	}
 	bool maxclass::outcheck(const geo::point &pointnum, const geo::point &center, double nowbest, double minr, double sigmar, int n){
 		return (pointnum - center).len() >= nowbest + minr;
 	}
@@ -105,7 +117,7 @@ namespace maxavg{
 	}
 	data::result maxclass::naivegreedy(const std::vector<data::mappoint> &mappoints, const data::query &query, const std::vector<int> &endpoints, const std::vector<std::vector<int>> &needpoints){
 		data::result res;
-		res.reslength = 0;
+		res.reslength = 1e100;
 		geo::point center = geo::findcircle(query.start);
 		if (endpoints.size() == 0){
 			res.reslength = 1e100;
@@ -127,6 +139,110 @@ namespace maxavg{
 			auto endpointi = ann.nextsmallest(res.reslength);
 			if (endpointi < 0) break;
 			auto tres = onenaivegreedy(mappoints, query, endpointi, needpoints);
+			if (tres.reslength < res.reslength)
+				res = tres;
+		}
+		return res;
+	}
+	data::result maxclass::onebettergreedy(const std::vector<data::mappoint> &mappoints, const data::query &query, int endpointi, const std::vector<std::vector<int>> &needpoints){
+		data::result res;
+		res.reslength = 0;
+		res.endpoint = endpointi;
+		auto endpoint = mappoints[endpointi].p;
+		std::vector<std::vector<heapunit>> heaps;
+		for (int i = 0; i < query.start.size(); i++){
+			data::oneline one;
+			one.category = 0;
+			one.length = (query.start[i] - endpoint).len();
+			res.lines.push_back(one);
+			heaps.push_back(std::vector<heapunit>());
+			if (one.length > res.reslength)
+				res.reslength = one.length;
+			for (auto &j : needpoints){
+				for (auto k : j)
+					heaps[i].push_back(heapunit::makeheapunit(mappoints, -1, endpointi, k, res.lines.size() - 1, query.start[i]));
+				std::make_heap(heaps[i].begin(), heaps[i].end());
+			}
+		}
+		unsigned long long totcate = 0;
+		for (;;){
+			int nowmin = 0;
+			for (int i = 0; i < res.lines.size(); i++)
+				if (res.lines[nowmin].length > res.lines[i].length)
+					nowmin = i;
+			auto &heap = heaps[nowmin];
+			auto &line = res.lines[nowmin];
+			for (;;){
+				if (heap.size() == 0){
+					res.reslength = 1e100;
+					return res;
+				}
+				int mid = heap[0].pmid, start = heap[0].p1, end = heap[0].p2;
+				double delta = heap[0].length;
+				bool exist = start == -1 ? (line.res.size() == 0 ? end == endpointi : end == line.res[0]) : 0;
+				for (int i = 0; i < line.res.size(); i++)
+					if (line.res[i] == start)
+						exist = end == (i + 1 == line.res.size() ? endpointi : line.res[i + 1]);
+				std::pop_heap(heap.begin(), heap.end());
+				heap.pop_back();
+				if (!exist) continue;
+				unsigned long long nowcate = 0;
+				for (int i = 0; i < query.needcategory.size(); i++)
+					for (auto j : mappoints[mid].category)
+						if (query.needcategory[i] == j)
+							nowcate |= 1 << i;
+				if (nowcate == (totcate & nowcate)) continue;
+				line.res.push_back(mid);
+				line.length += delta;
+				totcate |= nowcate;
+				line.category |= nowcate;
+				if (line.length > res.reslength)
+					res.reslength = line.length;
+				for (int i = line.res.size() - 1;; i--)
+					if (i && line.res[i - 1] != start){
+						line.res[i] = line.res[i - 1];
+						line.res[i - 1] = mid;
+					}
+					else{
+						for (int i = 0; i < needpoints.size(); i++)
+							if (!((1 << i) & totcate))
+								for (auto j : needpoints[i]){
+									heap.push_back(heapunit::makeheapunit(mappoints, start, mid, j, nowmin, query.start[nowmin]));
+									std::push_heap(heap.begin(), heap.end());
+									heap.push_back(heapunit::makeheapunit(mappoints, mid, end, j, nowmin, query.start[nowmin]));
+									std::push_heap(heap.begin(), heap.end());
+								}
+						break;
+					}
+				break;
+			}
+			if (totcate + 1 == 1 << query.needcategory.size()) return res;
+		}
+	}
+	data::result maxclass::bettergreedy(const std::vector<data::mappoint> &mappoints, const data::query &query, const std::vector<int> &endpoints, const std::vector<std::vector<int>> &needpoints){
+		data::result res;
+		res.reslength = 1e100;
+		geo::point center = geo::findcircle(query.start);
+		if (endpoints.size() == 0){
+			res.reslength = 1e100;
+			return res;
+		}
+		auto endpointi = endpoints[0];
+		for (auto i : endpoints){
+			auto p = mappoints[i].p;
+			if ((p - center).len() < (mappoints[endpointi].p - center).len())
+				endpointi = i;
+		}
+		return onebettergreedy(mappoints, query, endpointi, needpoints);
+	}
+	data::result maxclass::bettergreedyplus(const std::vector<data::mappoint> &mappoints, const data::query &query, const std::vector<int> &endpoints, const std::vector<std::vector<int>> &needpoints){
+		data::result res;
+		res.reslength = 1e100;
+		ann::ann<maxclass> ann(mappoints, query);
+		for (;;){
+			auto endpointi = ann.nextsmallest(res.reslength);
+			if (endpointi < 0) break;
+			auto tres = onebettergreedy(mappoints, query, endpointi, needpoints);
 			if (tres.reslength < res.reslength)
 				res = tres;
 		}
@@ -271,6 +387,98 @@ namespace maxavg{
 			auto endpointi = ann.nextsmallest(res.reslength);
 			if (endpointi < 0) break;
 			auto tres = onenaivegreedy(mappoints, query, endpointi, needpoints);
+			if (tres.reslength < res.reslength)
+				res = tres;
+		}
+		return res;
+	}
+	data::result avgclass::onebettergreedy(const std::vector<data::mappoint> &mappoints, const data::query &query, int endpointi, const std::vector<std::vector<int>> &needpoints){
+		data::result res;
+		res.reslength = 0;
+		res.endpoint = endpointi;
+		auto endpoint = mappoints[endpointi].p;
+		std::vector<heapunit> heap;
+		for (int i = 0; i < query.start.size(); i++){
+			data::oneline one;
+			one.category = 0;
+			one.length = (query.start[i] - endpoint).len();
+			res.lines.push_back(one);
+			res.reslength += one.length;
+			for (auto &j : needpoints)
+				for (auto k : j)
+					heap.push_back(heapunit::makeheapunit(mappoints, -1, endpointi, k, res.lines.size() - 1, query.start[i]));
+		}
+		std::make_heap(heap.begin(), heap.end());
+		unsigned long long totcate = 0;
+		for (;;){
+			if (heap.size() == 0){
+				res.reslength = 1e100;
+				return res;
+			}
+			int mid = heap[0].pmid, start = heap[0].p1, end = heap[0].p2, linenum = heap[0].linenum;
+			double delta = heap[0].length;
+			auto &line = res.lines[linenum];
+			bool exist = start == -1 ? (line.res.size() == 0 ? end == endpointi : end == line.res[0]) : 0;
+			for (int i = 0; i < line.res.size(); i++)
+				if (line.res[i] == start)
+					exist = end == (i + 1 == line.res.size() ? endpointi : line.res[i + 1]);
+			std::pop_heap(heap.begin(), heap.end());
+			heap.pop_back();
+			if (!exist) continue;
+			unsigned long long nowcate = 0;
+			for (int i = 0; i < query.needcategory.size(); i++)
+				for (auto j : mappoints[mid].category)
+					if (query.needcategory[i] == j)
+						nowcate |= 1 << i;
+			if (nowcate == (totcate & nowcate)) continue;
+			line.res.push_back(mid);
+			line.length += delta;
+			totcate |= nowcate;
+			line.category |= nowcate;
+			res.reslength += delta;
+			for (int i = line.res.size() - 1;; i--)
+				if (i && line.res[i - 1] != start){
+					line.res[i] = line.res[i - 1];
+					line.res[i - 1] = mid;
+				}
+				else{
+					for (int i = 0; i < needpoints.size(); i++)
+						if (!((1 << i) & totcate))
+							for (auto j : needpoints[i]){
+								heap.push_back(heapunit::makeheapunit(mappoints, start, mid, j, linenum, query.start[linenum]));
+								std::push_heap(heap.begin(), heap.end());
+								heap.push_back(heapunit::makeheapunit(mappoints, mid, end, j, linenum, query.start[linenum]));
+								std::push_heap(heap.begin(), heap.end());
+							}
+					break;
+				}
+			if (totcate + 1 == 1 << query.needcategory.size()) return res;
+		}
+	}
+	data::result avgclass::bettergreedy(const std::vector<data::mappoint> &mappoints, const data::query &query, const std::vector<int> &endpoints, const std::vector<std::vector<int>> &needpoints){
+		data::result res;
+		res.reslength = 1e100;
+		geo::point center = geo::findcircle(query.start);
+		if (endpoints.size() == 0){
+			res.reslength = 1e100;
+			return res;
+		}
+		auto endpointi = endpoints[0];
+		for (auto i : endpoints){
+			auto p = mappoints[i].p;
+			if ((p - center).len() < (mappoints[endpointi].p - center).len())
+				endpointi = i;
+		}
+		return onebettergreedy(mappoints, query, endpointi, needpoints);
+	}
+	data::result avgclass::bettergreedyplus(const std::vector<data::mappoint> &mappoints, const data::query &query, const std::vector<int> &endpoints, const std::vector<std::vector<int>> &needpoints){
+		data::result res;
+		res.reslength = 1e100;
+		ann::ann<avgclass> ann(mappoints, query);
+		for (;;){
+			auto endpointi = ann.nextsmallest(res.reslength);
+			if (endpointi < 0) break;
+			auto tres = onebettergreedy(mappoints, query, endpointi, needpoints);
 			if (tres.reslength < res.reslength)
 				res = tres;
 		}

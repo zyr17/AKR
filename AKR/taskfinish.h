@@ -14,6 +14,11 @@ namespace taskfinish{
 		void insert(data::oneline *number);
 		data::oneline* findmin(int category) const;
 		data::oneline* operator[](int category) const;
+		~onelinehash() {
+			for (auto &i : min)
+				for (auto j : i)
+					delete j;
+		}
 	};
 	struct onestart{
 		std::vector<data::oneline*> heap;
@@ -34,6 +39,11 @@ namespace taskfinish{
 	public:
 		taskfinish(const std::vector<data::mappoint> &inmappoints, const data::query &inquery, const std::vector<std::vector<int>> &inneedpoints, int inm);
 		data::result get(const std::vector<int> &belong, double lup);
+		~taskfinish() {
+			for (auto &i : starts)
+				for (auto &j : i.heap)
+					delete j;
+		}
 	};
 	template <class T> taskfinish<T>::taskfinish(const std::vector<data::mappoint> &inmappoints, const data::query &inquery, const std::vector<std::vector<int>> &inneedpoints, int inm){
 		query = inquery;
@@ -70,6 +80,7 @@ namespace taskfinish{
 		return (res > line ? res : line) < lup;
 	}*/
 	template <class T> data::result taskfinish<T>::get(const std::vector<int> &belong, double lup){
+		//bool printend = 0;
 		data::result res;
 		res.endpoint = m;
 		res.reslength = 0;
@@ -89,7 +100,9 @@ namespace taskfinish{
 				//	llow = preget->length;
 			}
 			else{
-				for (;;){
+				for (int count = 0;; count++){
+					//if (count % 100000 == 0 && count) printf("%d %d %d %d\n", i, count, hash.size(), heap.size());
+					//if (count > 99999) printend = 1;
 					if (!heap.size()){
 						res.reslength = 1e100;
 						return res;
@@ -143,6 +156,8 @@ namespace taskfinish{
 				}
 			}
 		}
+		//if (printend)
+		//	printf("--------------get end---------------\n");
 		return res;
 	}
 }

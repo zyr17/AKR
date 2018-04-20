@@ -94,8 +94,9 @@ template <class T> data::result funcs<T>::getdetail(const std::vector<data::mapp
 }
 template <class T> std::vector<int> funcs<T>::getendpoints(const std::vector<data::mappoint> &mappoints, const data::query &query, double nowbest){
 	std::vector<int> res;
+	auto nowbest2 = nowbest * nowbest;
 	for (auto &mappoint : mappoints){
-		if (T::getenddis(query, mappoint.p) >= nowbest)
+		if (T::getenddis2(query, mappoint.p) >= nowbest2)
 			continue;
 		unsigned long long ull = 1LL << query.endcategory.size();
 		for (auto i : query.endcategory){
@@ -149,6 +150,7 @@ template <class T> data::result funcs<T>::exactway1(const std::vector<data::mapp
 	return res;
 }
 template <class T> data::result funcs<T>::exactway2(const std::vector<data::mappoint> &mappoints, const data::query &query){
+	auto starttime = timeGetTime();
 	data::result res = naivegreedyway(mappoints, query);
 	//low:全部直接连，理论最小值 up:目前最优解的值
 	double llow = 0, &lup = res.reslength;
@@ -156,10 +158,11 @@ template <class T> data::result funcs<T>::exactway2(const std::vector<data::mapp
 	auto allneedpoints = getneedpoints(mappoints, query);
 	ann::ann<T> ann(mappoints, query);
 	for (;;){
+		//printf("--------------new endpoint---------------\n");
 		int nowend = ann.nextsmallest(res.reslength);
 		if (nowend == -1) break;
 		llow = T::getenddis(query, mappoints[nowend].p);
-		if (llow > lup) return res;
+		if (llow > lup) break;
 		auto needpoints = filtneedpoints(mappoints, query, allneedpoints, mappoints[nowend].p, lup);
 		bool flag = 0;
 		for (auto &i : needpoints)
@@ -174,7 +177,7 @@ template <class T> data::result funcs<T>::exactway2(const std::vector<data::mapp
 				res = nowres;
 				//max下，两者相等那么已经有最优解可以不继续枚举；avg下需要中途点完全没有绕路，基本无效但是基本没有代价
 				if (lup == llow)
-					return res;
+					goto End;
 			}
 			bool flag = 0;
 			for (int i = query.needcategory.size() - 1; i >= 0; i--){
@@ -189,25 +192,39 @@ template <class T> data::result funcs<T>::exactway2(const std::vector<data::mapp
 				break;
 		}
 	}
+End:;
+	res.time = timeGetTime() - starttime;
 	return res;
 }
 template <class T> data::result funcs<T>::naivegreedyway(const std::vector<data::mappoint> &mappoints, const data::query &query){
+	auto start = timeGetTime();
 	auto endpoints = getendpoints(mappoints, query, 1e100);
 	auto needpoints = getneedpoints(mappoints, query);
-	return T::naivegreedy(mappoints, query, endpoints, needpoints);
+	auto res = T::naivegreedy(mappoints, query, endpoints, needpoints);
+	res.time = timeGetTime() - start;
+	return res;
 }
 template <class T> data::result funcs<T>::naivegreedywayplus(const std::vector<data::mappoint> &mappoints, const data::query &query){
+	auto start = timeGetTime();
 	auto endpoints = getendpoints(mappoints, query, 1e100);
 	auto needpoints = getneedpoints(mappoints, query);
-	return T::naivegreedyplus(mappoints, query, endpoints, needpoints);
+	auto res = T::naivegreedyplus(mappoints, query, endpoints, needpoints);
+	res.time = timeGetTime() - start;
+	return res;
 }
 template <class T> data::result funcs<T>::bettergreedyway(const std::vector<data::mappoint> &mappoints, const data::query &query){
+	auto start = timeGetTime();
 	auto endpoints = getendpoints(mappoints, query, 1e100);
 	auto needpoints = getneedpoints(mappoints, query);
-	return T::bettergreedy(mappoints, query, endpoints, needpoints);
+	auto res = T::bettergreedy(mappoints, query, endpoints, needpoints);
+	res.time = timeGetTime() - start;
+	return res;
 }
 template <class T> data::result funcs<T>::bettergreedywayplus(const std::vector<data::mappoint> &mappoints, const data::query &query){
+	auto start = timeGetTime();
 	auto endpoints = getendpoints(mappoints, query, 1e100);
 	auto needpoints = getneedpoints(mappoints, query);
-	return T::bettergreedyplus(mappoints, query, endpoints, needpoints);
+	auto res = T::bettergreedyplus(mappoints, query, endpoints, needpoints);
+	res.time = timeGetTime() - start;
+	return res;
 }

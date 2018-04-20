@@ -15,14 +15,17 @@ namespace maxavg{
 	bool maxclass::outcheck(const geo::point &pointnum, const geo::point &center, double nowbest, double minr, double sigmar, int n){
 		return (pointnum - center).len() >= nowbest + minr;
 	}
-	double maxclass::getenddis(const data::query &query, const geo::point &p){
+	double maxclass::getenddis2(const data::query &query, const geo::point &p){
 		double res = 0;
 		for (auto &j : query.start){
-			double t = (j - p).len();
+			double t = (j - p).len2();
 			if (t > res)
 				res = t;
 		}
 		return res;
+	}
+	double maxclass::getenddis(const data::query &query, const geo::point &p) {
+		return sqrt(getenddis2(query, p));
 	}
 	void maxclass::updatereslength(data::detaildata &detail, double data) {
 		if (data > detail.res.reslength)
@@ -269,11 +272,14 @@ namespace maxavg{
 	bool avgclass::outcheck(const geo::point &pointnum, const geo::point &center, double nowbest, double minr, double sigmar, int n){
 		return n * (pointnum - center).len() >= nowbest + sigmar;
 	}
-	double avgclass::getenddis(const data::query &query, const geo::point &p){
+	double avgclass::getenddis2(const data::query &query, const geo::point &p){
 		double res = 0;
 		for (auto &j : query.start)
-			res += (j - p).len();
+			res += (j - p).len2();
 		return res;
+	}
+	double avgclass::getenddis(const data::query &query, const geo::point &p) {
+		return sqrt(getenddis2(query, p));
 	}
 	void avgclass::updatereslength(data::detaildata &detail, double data) {
 		detail.res.reslength += data;

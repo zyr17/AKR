@@ -1,6 +1,9 @@
 #include "init.h"
+#include "funcs.h"
 namespace init {
 	std::vector<std::string> num2words;
+	std::vector<int> numstime;
+	std::vector<std::vector<int>> numunderlimit;
 	std::vector<data::mappoint> initmappoints(std::string filename, std::map<std::string, int> &words2num){
 		FILE *f = fopen(filename.c_str(), "r");
 		std::vector<data::mappoint> res;
@@ -16,11 +19,21 @@ namespace init {
 					int nownum = words2num.size();
 					words2num[name] = nownum;
 					num2words.push_back(name);
+					numstime.push_back(0);
 				}
 				tmp.category.push_back(words2num[name]);
+				numstime[words2num[name]]++;
 			}
 			res.push_back(tmp);
 			//printf("%d\n", res.size());
+		}
+		numunderlimit.resize(15);
+		for (int i = 0; i < num2words.size(); i++) {
+			for (int j = 0; ; j++)
+				if (numstime[i] <= limit[j]) {
+					numunderlimit[j].push_back(i);
+					break;
+				}
 		}
 		fclose(f);
 		return res;
@@ -57,7 +70,31 @@ namespace init {
 		fclose(f);
 		return res;
 	}
-	data::query randomquery(int startpointnum, int endcategorynum, int needcategorynum, std::vector<data::mappoint> &mappoints, std::map<std::string, int>& words2num)
+	std::vector<int> generateendcate(int low, int up, std::vector<data::mappoint> &mappoints, int wordssize) {
+		for (;;) {
+			std::vector<int> vec;
+			std::vector<int> remain;
+			for (int i = 0; i < mappoints.size(); i++)
+				remain.push_back(i);
+			for (;;) {
+				int nowcate = rand() % wordssize;
+				vec.push_back(nowcate);
+				std::vector<int> nowremain;
+				int tot = 0;
+				for (auto re : remain) {
+					bool flag = 0;
+					for (auto i : mappoints[re].category)
+						if (i == nowcate) flag = 1;
+					if (flag)
+						nowremain.push_back(re);
+				}
+				if (nowremain.size() > low && nowremain.size() <= up) return vec;
+				else if (nowremain.size() <= low) break;
+				remain = nowremain;
+			}
+		}
+	}
+	data::query randomquery(int startpointnum, int endlimit, int needcategorynum, int minlimit, int maxlimit, double cover, std::vector<data::mappoint> &mappoints, std::map<std::string, int>& words2num)
 	{
 		data::query res;
 		double minx = 1e100, miny = 1e100, maxx = - 1e100, maxy = - 1e100;
@@ -67,16 +104,23 @@ namespace init {
 			if (maxx < i.p.x) maxx = i.p.x;
 			if (maxy < i.p.y) maxy = i.p.y;
 		}
-		double delx = maxx - minx, dely = maxy - miny;
+		cover = sqrt(cover);
+		double tdelx = maxx - minx, tdely = maxy - miny;
+		double delx = tdelx * cover, dely = tdely * cover;
+		minx += tdelx * (1 - cover) * rand() / RAND_MAX;
+		miny += tdely * (1 - cover) * rand() / RAND_MAX;
 		for (int i = startpointnum; i--; ){
 			double x = minx + delx * rand() / RAND_MAX, y = miny + dely * rand() / RAND_MAX;
 			res.start.push_back(geo::point(x, y));
 		}
 		assert(words2num.size() <= RAND_MAX);
-		for (int i = endcategorynum; i--; )
-			res.endcategory.push_back(rand() % words2num.size());
+		res.endcategory = generateendcate(limit[endlimit - 1], limit[endlimit], mappoints, words2num.size());
+		std::vector<int> candidate;
+		for (int i = minlimit + 1; i <= maxlimit; i++)
+			for (auto j : numunderlimit[i])
+				candidate.push_back(j);
 		for (int i = needcategorynum; i--; )
-			res.needcategory.push_back(rand() % words2num.size());
+			res.needcategory.push_back(candidate[rand() % candidate.size()]);
 		return res;
 	}
 

@@ -30,6 +30,7 @@ namespace data {
 		double reslength;
 		int endpoint;
 		std::vector<oneline> lines;
+		unsigned int time;
 		void write(std::string filename, query *query = nullptr);
 		std::string writestr();
 	};

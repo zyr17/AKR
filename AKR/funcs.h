@@ -150,12 +150,16 @@ template <class T> data::result funcs<T>::exactway1(const std::vector<data::mapp
 	return res;
 }
 template <class T> data::result funcs<T>::exactway2(const std::vector<data::mappoint> &mappoints, const data::query &query){
-	auto starttime = timeGetTime();
 	data::result res = naivegreedyway(mappoints, query);
 	//low:全部直接连，理论最小值 up:目前最优解的值
 	double llow = 0, &lup = res.reslength;
 	auto endpoints = getendpoints(mappoints, query, res.reslength);
 	auto allneedpoints = getneedpoints(mappoints, query);
+	LARGE_INTEGER litmp;
+	QueryPerformanceFrequency(&litmp);
+	auto dfFreq = litmp.QuadPart;
+	QueryPerformanceCounter(&litmp);
+	auto start = litmp.QuadPart;
 	ann::ann<T> ann(mappoints, query);
 	for (;;){
 		//printf("--------------new endpoint---------------\n");
@@ -193,38 +197,59 @@ template <class T> data::result funcs<T>::exactway2(const std::vector<data::mapp
 		}
 	}
 End:;
-	res.time = timeGetTime() - starttime;
+	QueryPerformanceCounter(&litmp);
+	res.time = (litmp.QuadPart - start) * 1000000 / dfFreq;
 	return res;
 }
 template <class T> data::result funcs<T>::naivegreedyway(const std::vector<data::mappoint> &mappoints, const data::query &query){
-	auto start = timeGetTime();
 	auto endpoints = getendpoints(mappoints, query, 1e100);
 	auto needpoints = getneedpoints(mappoints, query);
+	LARGE_INTEGER litmp;
+	QueryPerformanceFrequency(&litmp);
+	auto dfFreq = litmp.QuadPart;
+	QueryPerformanceCounter(&litmp);
+	auto start = litmp.QuadPart;
 	auto res = T::naivegreedy(mappoints, query, endpoints, needpoints);
-	res.time = timeGetTime() - start;
+	QueryPerformanceCounter(&litmp);
+	res.time = (litmp.QuadPart - start) * 1000000 / dfFreq;
 	return res;
 }
 template <class T> data::result funcs<T>::naivegreedywayplus(const std::vector<data::mappoint> &mappoints, const data::query &query){
-	auto start = timeGetTime();
 	auto endpoints = getendpoints(mappoints, query, 1e100);
 	auto needpoints = getneedpoints(mappoints, query);
+	LARGE_INTEGER litmp;
+	QueryPerformanceFrequency(&litmp);
+	auto dfFreq = litmp.QuadPart;
+	QueryPerformanceCounter(&litmp);
+	auto start = litmp.QuadPart;
 	auto res = T::naivegreedyplus(mappoints, query, endpoints, needpoints);
-	res.time = timeGetTime() - start;
+	QueryPerformanceCounter(&litmp);
+	res.time = (litmp.QuadPart - start) * 1000000 / dfFreq;
 	return res;
 }
 template <class T> data::result funcs<T>::bettergreedyway(const std::vector<data::mappoint> &mappoints, const data::query &query){
-	auto start = timeGetTime();
 	auto endpoints = getendpoints(mappoints, query, 1e100);
 	auto needpoints = getneedpoints(mappoints, query);
+	LARGE_INTEGER litmp;
+	QueryPerformanceFrequency(&litmp);
+	auto dfFreq = litmp.QuadPart;
+	QueryPerformanceCounter(&litmp);
+	auto start = litmp.QuadPart;
 	auto res = T::bettergreedy(mappoints, query, endpoints, needpoints);
-	res.time = timeGetTime() - start;
+	QueryPerformanceCounter(&litmp);
+	res.time = (litmp.QuadPart - start) * 1000000 / dfFreq;
 	return res;
 }
 template <class T> data::result funcs<T>::bettergreedywayplus(const std::vector<data::mappoint> &mappoints, const data::query &query){
-	auto start = timeGetTime();
 	auto endpoints = getendpoints(mappoints, query, 1e100);
 	auto needpoints = getneedpoints(mappoints, query);
+	LARGE_INTEGER litmp;
+	QueryPerformanceFrequency(&litmp);
+	auto dfFreq = litmp.QuadPart;
+	QueryPerformanceCounter(&litmp);
+	auto start = litmp.QuadPart;
 	auto res = T::bettergreedyplus(mappoints, query, endpoints, needpoints);
-	res.time = timeGetTime() - start;
+	QueryPerformanceCounter(&litmp);
+	res.time = (litmp.QuadPart - start) * 1000000 / dfFreq;
 	return res;
 }

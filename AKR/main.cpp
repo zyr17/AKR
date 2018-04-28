@@ -31,7 +31,7 @@ void multitests(int times, double &trueclock, std::vector<double> &greedyclock, 
 			query = randomed[i - 1];
 		}
 		else{
-			query = init::randomquery(4, 5, 6, 4, 5, 0.9, mappoints, words2num);
+			query = init::randomquery(4, 5, 6, 4, 5, 0.09, mappoints, words2num);
 			sprintf(buffer, DATAFOLDER "/random/query/%06d.txt", i);
 			query.write(buffer);
 		}
